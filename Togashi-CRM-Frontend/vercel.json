@@ -2,7 +2,6 @@
   "buildCommand": "pnpm build",
   "outputDirectory": "artifacts/togashi-crm/dist",
   "installCommand": "pnpm install",
-  "framework": "vite",
   "rewrites": [
     {
       "source": "/(.*)",

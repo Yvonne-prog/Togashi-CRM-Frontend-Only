@@ -5,7 +5,7 @@ import { useLogout } from '@workspace/api-client-react';
 import { cn } from '@/lib/utils';
 import {
   Category, Profile2User, Building, ProfileAdd, ReceiptItem,
-  TaskSquare, Task, Calendar, DocumentText, MessageText,
+  Note, TaskSquare, Task, Calendar, DocumentText, MessageText,
   Chart, Setting2, ArrowLeft2, ArrowRight2, Logout,
   ArrowDown2, User,
 } from 'iconsax-react';
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: '/companies', label: 'Companies', icon: Building },
   { href: '/leads', label: 'Leads', icon: ProfileAdd },
   { href: '/deals', label: 'Deals', icon: ReceiptItem },
+  { href: '/quotations', label: 'Quotations', icon: Note },
   { href: '/projects', label: 'Projects', icon: TaskSquare },
   { href: '/tasks', label: 'Tasks', icon: Task },
   { href: '/calendar', label: 'Calendar', icon: Calendar },

@@ -717,3 +717,370 @@ export const projects: Project[] = [
     ],
   },
 ];
+
+// ============================================================================
+// QUOTATIONS
+// ============================================================================
+
+export type QuotationStatus = 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Expired';
+
+export interface QuotationLineItem {
+  id: string;
+  item: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface Quotation {
+  id: string;
+  number: string;
+  title: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  companyName: string;
+  description: string;
+  amount: number;
+  currency: 'UGX' | 'USD';
+  status: QuotationStatus;
+  issueDate: string;
+  validUntil: string;
+  lastUpdated: string;
+  lineItems: QuotationLineItem[];
+  discount: number;
+  discountType: 'fixed' | 'percentage';
+  tax: number;
+  taxEnabled: boolean;
+  subtotal: number;
+  clientNote: string;
+  paymentTerms: string;
+  deliveryTimeline: string;
+  quotationTerms: string;
+  additionalConditions: string;
+  relatedDealId?: string;
+  relatedDealTitle?: string;
+  relatedProjectId?: string;
+  relatedProjectName?: string;
+  initials: string;
+}
+
+export interface QuotationStats {
+  total: number;
+  pendingApproval: number;
+  accepted: number;
+  expired: number;
+}
+
+export const quotationStats: QuotationStats = {
+  total: 9,
+  pendingApproval: 3,
+  accepted: 2,
+  expired: 1,
+};
+
+export const quotations: Quotation[] = [
+  {
+    id: 'qtn-1',
+    number: 'TGL-QTN-2026-001',
+    title: 'Katrina Fashion Website Development',
+    contactName: 'Grace Namugenyi',
+    contactEmail: 'grace.nam@email.com',
+    contactPhone: '+256 774 500 600',
+    companyName: 'Katrina Fashion Finds',
+    description: 'Full e-commerce website with product catalogue, payment integration, and order management.',
+    amount: 18000000,
+    currency: 'UGX',
+    status: 'Accepted',
+    issueDate: 'Mar 10, 2026',
+    validUntil: 'Apr 10, 2026',
+    lastUpdated: 'Mar 18, 2026',
+    lineItems: [
+      { id: 'li-1', item: 'UI/UX Design', description: 'Wireframes, prototypes, and visual design for all pages', quantity: 1, unitPrice: 5000000, lineTotal: 5000000 },
+      { id: 'li-2', item: 'Frontend Development', description: 'React-based responsive frontend with Tailwind CSS', quantity: 1, unitPrice: 7000000, lineTotal: 7000000 },
+      { id: 'li-3', item: 'Backend & CMS Integration', description: 'API development and content management setup', quantity: 1, unitPrice: 4000000, lineTotal: 4000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 2000000,
+    taxEnabled: true,
+    subtotal: 16000000,
+    clientNote: 'We look forward to working with Katrina Fashion Finds on this exciting e-commerce project.',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '12 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date. Prices are subject to change after the validity period. Any additional features requested beyond the scope will be quoted separately.',
+    additionalConditions: 'Client to provide all brand assets, product images, and content within 2 weeks of project commencement.',
+    relatedDealId: 'dl-1',
+    relatedDealTitle: 'Katrina Fashion Website',
+    initials: 'KF',
+  },
+  {
+    id: 'qtn-2',
+    number: 'TGL-QTN-2026-002',
+    title: 'Sparkles Salon Website Upgrade',
+    contactName: 'John Mukasa',
+    contactEmail: 'john.mukasa@email.com',
+    contactPhone: '+256 701 200 300',
+    companyName: 'Sparkles Salon Uganda',
+    description: 'Website redesign with online booking system, service catalogue, and customer portal.',
+    amount: 8500000,
+    currency: 'UGX',
+    status: 'Sent',
+    issueDate: 'Jun 15, 2026',
+    validUntil: 'Jul 15, 2026',
+    lastUpdated: 'Jun 15, 2026',
+    lineItems: [
+      { id: 'li-4', item: 'Website Redesign', description: 'Complete visual overhaul of existing website', quantity: 1, unitPrice: 4000000, lineTotal: 4000000 },
+      { id: 'li-5', item: 'Online Booking System', description: 'Appointment scheduling and management portal', quantity: 1, unitPrice: 3000000, lineTotal: 3000000 },
+      { id: 'li-6', item: 'Customer Portal', description: 'Client login, booking history, and loyalty tracking', quantity: 1, unitPrice: 1500000, lineTotal: 1500000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 8500000,
+    clientNote: 'This quotation covers a full upgrade of the Sparkles Salon digital presence.',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '8 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date.',
+    additionalConditions: '',
+    relatedDealId: 'dl-3',
+    relatedDealTitle: 'Sparkles Salon Website',
+    initials: 'SS',
+  },
+  {
+    id: 'qtn-3',
+    number: 'TGL-QTN-2026-003',
+    title: 'Standard Chartered Digital Business Cards',
+    contactName: 'Esther Auma',
+    contactEmail: 'esther.a@email.com',
+    contactPhone: '+256 785 500 900',
+    companyName: 'Standard Chartered Uganda',
+    description: 'Digital business card platform with NFC integration, analytics, and team management.',
+    amount: 32000000,
+    currency: 'UGX',
+    status: 'Draft',
+    issueDate: 'Jul 20, 2026',
+    validUntil: 'Aug 20, 2026',
+    lastUpdated: 'Jul 22, 2026',
+    lineItems: [
+      { id: 'li-7', item: 'Platform Development', description: 'Web and mobile-responsive digital card platform', quantity: 1, unitPrice: 15000000, lineTotal: 15000000 },
+      { id: 'li-8', item: 'NFC Integration', description: 'NFC tag provisioning and card writing system', quantity: 1, unitPrice: 8000000, lineTotal: 8000000 },
+      { id: 'li-9', item: 'Analytics Dashboard', description: 'Real-time card view and scan analytics', quantity: 1, unitPrice: 6000000, lineTotal: 6000000 },
+      { id: 'li-10', item: 'Team Management', description: 'Multi-user access with role-based permissions', quantity: 1, unitPrice: 3000000, lineTotal: 3000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 32000000,
+    clientNote: '',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '16 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date.',
+    additionalConditions: 'NFC cards hardware cost not included. Client to procure NFC cards separately.',
+    initials: 'SC',
+  },
+  {
+    id: 'qtn-4',
+    number: 'TGL-QTN-2026-004',
+    title: 'Amira Interiors Visualisation Platform',
+    contactName: 'Sarah Achieng',
+    contactEmail: 'sarah.achieng@email.com',
+    contactPhone: '+256 772 100 200',
+    companyName: 'Amira Interiors',
+    description: '3D interior visualisation platform for client presentations with virtual walkthroughs.',
+    amount: 45000000,
+    currency: 'UGX',
+    status: 'Sent',
+    issueDate: 'May 1, 2026',
+    validUntil: 'May 31, 2026',
+    lastUpdated: 'May 5, 2026',
+    lineItems: [
+      { id: 'li-11', item: '3D Rendering Engine', description: 'Real-time 3D rendering with WebGL integration', quantity: 1, unitPrice: 20000000, lineTotal: 20000000 },
+      { id: 'li-12', item: 'Virtual Walkthrough', description: 'Interactive 360-degree virtual tour system', quantity: 1, unitPrice: 12000000, lineTotal: 12000000 },
+      { id: 'li-13', item: 'Asset Library', description: 'Furniture and material catalogue with drag-and-drop', quantity: 1, unitPrice: 8000000, lineTotal: 8000000 },
+      { id: 'li-14', item: 'Client Portal', description: 'Project sharing and feedback collection system', quantity: 1, unitPrice: 5000000, lineTotal: 5000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 45000000,
+    clientNote: 'This platform will revolutionise how Amira Interiors presents designs to clients.',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '20 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date.',
+    additionalConditions: '',
+    relatedDealId: 'dl-4',
+    relatedDealTitle: 'Amira Interiors Phase Two',
+    initials: 'AI',
+  },
+  {
+    id: 'qtn-5',
+    number: 'TGL-QTN-2026-005',
+    title: 'Verax Mobile Application',
+    contactName: 'Peter Okot',
+    contactEmail: 'peter.okot@email.com',
+    contactPhone: '+256 753 400 500',
+    companyName: 'Verax',
+    description: 'Cross-platform mobile application for service delivery tracking and customer engagement.',
+    amount: 25000000,
+    currency: 'UGX',
+    status: 'Sent',
+    issueDate: 'Jul 5, 2026',
+    validUntil: 'Aug 5, 2026',
+    lastUpdated: 'Jul 12, 2026',
+    lineItems: [
+      { id: 'li-15', item: 'Mobile App Development', description: 'React Native cross-platform application (iOS & Android)', quantity: 1, unitPrice: 15000000, lineTotal: 15000000 },
+      { id: 'li-16', item: 'Backend API', description: 'REST API with real-time notifications and data sync', quantity: 1, unitPrice: 7000000, lineTotal: 7000000 },
+      { id: 'li-17', item: 'Admin Dashboard', description: 'Web-based admin panel for content and user management', quantity: 1, unitPrice: 3000000, lineTotal: 3000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 25000000,
+    clientNote: '',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '14 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date.',
+    additionalConditions: '',
+    initials: 'VX',
+  },
+  {
+    id: 'qtn-6',
+    number: 'TGL-QTN-2026-006',
+    title: 'Ellipse Enterprise Platform',
+    contactName: 'Maria Nalubega',
+    contactEmail: 'maria.nalubega@email.com',
+    contactPhone: '+256 782 300 400',
+    companyName: 'Ellipse',
+    description: 'Enterprise resource planning platform with financial modules, HR, and inventory management.',
+    amount: 55000000,
+    currency: 'UGX',
+    status: 'Accepted',
+    issueDate: 'Feb 1, 2026',
+    validUntil: 'Mar 1, 2026',
+    lastUpdated: 'Feb 20, 2026',
+    lineItems: [
+      { id: 'li-18', item: 'Core ERP Platform', description: 'Modular enterprise platform with role-based access', quantity: 1, unitPrice: 25000000, lineTotal: 25000000 },
+      { id: 'li-19', item: 'Financial Module', description: 'Accounting, invoicing, and financial reporting', quantity: 1, unitPrice: 12000000, lineTotal: 12000000 },
+      { id: 'li-20', item: 'HR Module', description: 'Employee management, payroll, and leave tracking', quantity: 1, unitPrice: 10000000, lineTotal: 10000000 },
+      { id: 'li-21', item: 'Inventory Module', description: 'Stock management and procurement workflows', quantity: 1, unitPrice: 8000000, lineTotal: 8000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 55000000,
+    clientNote: 'Ellipse Enterprise Platform will replace their legacy systems across all departments.',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '24 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date.',
+    additionalConditions: '',
+    relatedDealId: 'dl-2',
+    relatedDealTitle: 'Ellipse Enterprise Partnership',
+    relatedProjectId: 'pr-1',
+    relatedProjectName: 'Ellipse Enterprise Platform',
+    initials: 'EP',
+  },
+  {
+    id: 'qtn-7',
+    number: 'TGL-QTN-2026-007',
+    title: 'SafeBoda Fleet Management System',
+    contactName: 'Michael Wasswa',
+    contactEmail: 'michael.w@email.com',
+    contactPhone: '+256 703 110 220',
+    companyName: 'SafeBoda',
+    description: 'Fleet management dashboard with real-time GPS tracking, driver analytics, and maintenance scheduling.',
+    amount: 22000000,
+    currency: 'UGX',
+    status: 'Rejected',
+    issueDate: 'Apr 15, 2026',
+    validUntil: 'May 15, 2026',
+    lastUpdated: 'May 2, 2026',
+    lineItems: [
+      { id: 'li-22', item: 'GPS Tracking System', description: 'Real-time location tracking and route optimisation', quantity: 1, unitPrice: 10000000, lineTotal: 10000000 },
+      { id: 'li-23', item: 'Driver Analytics', description: 'Performance metrics and driver scoring system', quantity: 1, unitPrice: 7000000, lineTotal: 7000000 },
+      { id: 'li-24', item: 'Maintenance Module', description: 'Vehicle maintenance scheduling and alerts', quantity: 1, unitPrice: 5000000, lineTotal: 5000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 22000000,
+    clientNote: '',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '16 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date.',
+    additionalConditions: '',
+    initials: 'SB',
+  },
+  {
+    id: 'qtn-8',
+    number: 'TGL-QTN-2026-008',
+    title: 'MTN Uganda Self-Service Portal',
+    contactName: 'Jane Kisakye',
+    contactEmail: 'jane.kisakye@email.com',
+    contactPhone: '+256 785 700 800',
+    companyName: 'MTN Uganda',
+    description: 'Customer self-service portal with account management, bill payment, and service requests.',
+    amount: 55000000,
+    currency: 'UGX',
+    status: 'Draft',
+    issueDate: 'Jul 18, 2026',
+    validUntil: 'Aug 18, 2026',
+    lastUpdated: 'Jul 24, 2026',
+    lineItems: [
+      { id: 'li-25', item: 'Portal Frontend', description: 'Responsive web portal with mobile-first design', quantity: 1, unitPrice: 18000000, lineTotal: 18000000 },
+      { id: 'li-26', item: 'Backend Integration', description: 'Integration with MTN core billing and CRM systems', quantity: 1, unitPrice: 22000000, lineTotal: 22000000 },
+      { id: 'li-27', item: 'Payment Gateway', description: 'Mobile money and bank payment integration', quantity: 1, unitPrice: 10000000, lineTotal: 10000000 },
+      { id: 'li-28', item: 'Support Ticketing', description: 'Customer service request and tracking system', quantity: 1, unitPrice: 5000000, lineTotal: 5000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 55000000,
+    clientNote: '',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '18 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date.',
+    additionalConditions: 'MTN to provide API access and test environment credentials within 1 week of project commencement.',
+    initials: 'MT',
+  },
+  {
+    id: 'qtn-9',
+    number: 'TGL-QTN-2026-009',
+    title: 'Crown Beverages Distributor Portal',
+    contactName: 'Monica Birungi',
+    contactEmail: 'monica.b@email.com',
+    contactPhone: '+256 771 100 200',
+    companyName: 'Crown Beverages',
+    description: 'Distributor management portal with order processing, inventory tracking, and sales reporting.',
+    amount: 22000000,
+    currency: 'UGX',
+    status: 'Expired',
+    issueDate: 'Jan 10, 2026',
+    validUntil: 'Feb 10, 2026',
+    lastUpdated: 'Feb 12, 2026',
+    lineItems: [
+      { id: 'li-29', item: 'Distributor Portal', description: 'Web-based distributor order and management system', quantity: 1, unitPrice: 12000000, lineTotal: 12000000 },
+      { id: 'li-30', item: 'Inventory Tracking', description: 'Real-time stock level monitoring and alerts', quantity: 1, unitPrice: 6000000, lineTotal: 6000000 },
+      { id: 'li-31', item: 'Sales Reporting', description: 'Automated sales reports and analytics dashboard', quantity: 1, unitPrice: 4000000, lineTotal: 4000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 22000000,
+    clientNote: '',
+    paymentTerms: '50% deposit before work begins and the remaining balance upon completion or agreed project milestone.',
+    deliveryTimeline: '10 weeks from project kick-off',
+    quotationTerms: 'This quotation is valid for 30 days from the issue date.',
+    additionalConditions: '',
+    initials: 'CV',
+  },
+];

@@ -1084,3 +1084,774 @@ export const quotations: Quotation[] = [
     initials: 'CV',
   },
 ];
+
+// ============================================================================
+// INVOICES
+// ============================================================================
+
+export type InvoiceStatus = 'Draft' | 'Sent' | 'Partially Paid' | 'Paid' | 'Overdue' | 'Cancelled';
+export type PaymentMethod = 'Bank Transfer' | 'Mobile Money' | 'Cash' | 'Cheque' | 'Other';
+export type InvoiceType = 'Deposit' | 'Milestone' | 'Final' | 'Maintenance' | 'Other';
+
+export interface InvoiceLineItem {
+  id: string;
+  item: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface InvoicePayment {
+  id: string;
+  date: string;
+  amount: number;
+  method: PaymentMethod;
+  reference: string;
+  notes: string;
+}
+
+export interface Invoice {
+  id: string;
+  number: string;
+  title: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  companyName: string;
+  billingAddress: string;
+  description: string;
+  total: number;
+  amountPaid: number;
+  balance: number;
+  currency: 'UGX' | 'USD';
+  status: InvoiceStatus;
+  issueDate: string;
+  dueDate: string;
+  lastUpdated: string;
+  lineItems: InvoiceLineItem[];
+  discount: number;
+  discountType: 'fixed' | 'percentage';
+  tax: number;
+  taxEnabled: boolean;
+  subtotal: number;
+  paymentTerms: string;
+  clientNote: string;
+  internalNote: string;
+  paymentInstructions: string;
+  additionalConditions: string;
+  relatedQuotationId?: string;
+  relatedQuotationNumber?: string;
+  relatedDealId?: string;
+  relatedDealTitle?: string;
+  relatedProjectId?: string;
+  relatedProjectName?: string;
+  purchaseOrderNumber?: string;
+  invoiceType?: InvoiceType;
+  payments: InvoicePayment[];
+  initials: string;
+}
+
+export interface InvoiceStats {
+  totalInvoiced: number;
+  amountPaid: number;
+  amountDue: number;
+  overdueAmount: number;
+}
+
+export const invoiceStats: InvoiceStats = {
+  totalInvoiced: 112300000,
+  amountPaid: 51600000,
+  amountDue: 53700000,
+  overdueAmount: 18500000,
+};
+
+export const invoices: Invoice[] = [
+  {
+    id: 'inv-1',
+    number: 'TGL-INV-2026-001',
+    title: 'Katrina Fashion Website — Deposit',
+    contactName: 'Grace Namugenyi',
+    contactEmail: 'grace.nam@email.com',
+    contactPhone: '+256 774 500 600',
+    companyName: 'Katrina Fashion Finds',
+    billingAddress: 'Plot 45, Ntinda Complex, Kampala, Uganda',
+    description: '50% deposit for the e-commerce website development project as per quotation TGL-QTN-2026-001.',
+    total: 9000000,
+    amountPaid: 9000000,
+    balance: 0,
+    currency: 'UGX',
+    status: 'Paid',
+    issueDate: 'Mar 20, 2026',
+    dueDate: 'Apr 4, 2026',
+    lastUpdated: 'Mar 28, 2026',
+    lineItems: [
+      { id: 'ivli-1', item: 'UI/UX Design (Deposit)', description: '50% deposit for wireframes, prototypes and visual design', quantity: 1, unitPrice: 2500000, lineTotal: 2500000 },
+      { id: 'ivli-2', item: 'Frontend Development (Deposit)', description: '50% deposit for React-based responsive frontend', quantity: 1, unitPrice: 3500000, lineTotal: 3500000 },
+      { id: 'ivli-3', item: 'Backend & CMS (Deposit)', description: '50% deposit for API development and CMS setup', quantity: 1, unitPrice: 2000000, lineTotal: 2000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 1000000,
+    taxEnabled: true,
+    subtotal: 8000000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: 'Thank you for your prompt payment. We look forward to delivering this exciting project.',
+    internalNote: 'Deposit invoice. Remaining 50% to be invoiced upon completion.',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedQuotationId: 'qtn-1',
+    relatedQuotationNumber: 'TGL-QTN-2026-001',
+    relatedDealId: 'dl-1',
+    relatedDealTitle: 'Katrina Fashion Website',
+    invoiceType: 'Deposit',
+    payments: [
+      { id: 'pay-1', date: 'Mar 28, 2026', amount: 9000000, method: 'Bank Transfer', reference: 'STB-TRF-20260328-001', notes: 'Full deposit payment received.' },
+    ],
+    initials: 'KF',
+  },
+  {
+    id: 'inv-2',
+    number: 'TGL-INV-2026-002',
+    title: 'Ellipse Enterprise Platform — Milestone 1',
+    contactName: 'Maria Nalubega',
+    contactEmail: 'maria.nalubega@email.com',
+    contactPhone: '+256 782 300 400',
+    companyName: 'Ellipse',
+    billingAddress: 'Plot 12, Acacia Avenue, Kololo, Kampala, Uganda',
+    description: 'First milestone payment for the ERP platform — Core Platform and Financial Module as per quotation TGL-QTN-2026-006.',
+    total: 37000000,
+    amountPaid: 25000000,
+    balance: 12000000,
+    currency: 'UGX',
+    status: 'Partially Paid',
+    issueDate: 'Mar 5, 2026',
+    dueDate: 'Apr 5, 2026',
+    lastUpdated: 'Mar 15, 2026',
+    lineItems: [
+      { id: 'ivli-4', item: 'Core ERP Platform (Milestone 1)', description: 'First milestone for modular enterprise platform', quantity: 1, unitPrice: 25000000, lineTotal: 25000000 },
+      { id: 'ivli-5', item: 'Financial Module (Milestone 1)', description: 'First milestone for accounting and invoicing module', quantity: 1, unitPrice: 12000000, lineTotal: 12000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 37000000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: 'Milestone 1 includes the core platform architecture and financial module foundation.',
+    internalNote: 'Ellipse has paid 25M of 37M. Remaining 12M due.',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedQuotationId: 'qtn-6',
+    relatedQuotationNumber: 'TGL-QTN-2026-006',
+    relatedDealId: 'dl-2',
+    relatedDealTitle: 'Ellipse Enterprise Partnership',
+    relatedProjectId: 'pr-1',
+    relatedProjectName: 'Ellipse Enterprise Platform',
+    invoiceType: 'Milestone',
+    payments: [
+      { id: 'pay-2', date: 'Mar 15, 2026', amount: 25000000, method: 'Bank Transfer', reference: 'ELP-TRF-20260315-001', notes: 'Partial milestone payment received.' },
+    ],
+    initials: 'EP',
+  },
+  {
+    id: 'inv-3',
+    number: 'TGL-INV-2026-003',
+    title: 'Sparkles Salon Website Upgrade — Deposit',
+    contactName: 'John Mukasa',
+    contactEmail: 'john.mukasa@email.com',
+    contactPhone: '+256 701 200 300',
+    companyName: 'Sparkles Salon Uganda',
+    billingAddress: 'Plot 78, Buganda Road, Kampala, Uganda',
+    description: '50% deposit for the website upgrade project as per quotation TGL-QTN-2026-002.',
+    total: 4250000,
+    amountPaid: 0,
+    balance: 4250000,
+    currency: 'UGX',
+    status: 'Sent',
+    issueDate: 'Jun 20, 2026',
+    dueDate: 'Jul 20, 2026',
+    lastUpdated: 'Jun 20, 2026',
+    lineItems: [
+      { id: 'ivli-6', item: 'Website Redesign (Deposit)', description: '50% deposit for complete visual overhaul', quantity: 1, unitPrice: 2000000, lineTotal: 2000000 },
+      { id: 'ivli-7', item: 'Online Booking System (Deposit)', description: '50% deposit for appointment scheduling system', quantity: 1, unitPrice: 1500000, lineTotal: 1500000 },
+      { id: 'ivli-8', item: 'Customer Portal (Deposit)', description: '50% deposit for client login and loyalty tracking', quantity: 1, unitPrice: 750000, lineTotal: 750000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 4250000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: 'Please process this deposit at your earliest convenience to secure the project start date.',
+    internalNote: '',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedQuotationId: 'qtn-2',
+    relatedQuotationNumber: 'TGL-QTN-2026-002',
+    relatedDealId: 'dl-3',
+    relatedDealTitle: 'Sparkles Salon Website',
+    invoiceType: 'Deposit',
+    payments: [],
+    initials: 'SS',
+  },
+  {
+    id: 'inv-4',
+    number: 'TGL-INV-2026-004',
+    title: 'Amira Interiors Visualisation — Milestone 2',
+    contactName: 'Sarah Achieng',
+    contactEmail: 'sarah.achieng@email.com',
+    contactPhone: '+256 772 100 200',
+    companyName: 'Amira Interiors',
+    billingAddress: 'Plot 89, Industrial Area, Nairobi, Kenya',
+    description: 'Second milestone payment for the 3D visualisation platform — Virtual Walkthrough and Asset Library as per quotation TGL-QTN-2026-004.',
+    total: 20000000,
+    amountPaid: 12000000,
+    balance: 8000000,
+    currency: 'UGX',
+    status: 'Partially Paid',
+    issueDate: 'Jun 1, 2026',
+    dueDate: 'Jul 1, 2026',
+    lastUpdated: 'Jun 10, 2026',
+    lineItems: [
+      { id: 'ivli-9', item: 'Virtual Walkthrough (Milestone 2)', description: 'Second milestone for interactive 360-degree virtual tours', quantity: 1, unitPrice: 12000000, lineTotal: 12000000 },
+      { id: 'ivli-10', item: 'Asset Library (Milestone 2)', description: 'Second milestone for furniture and material catalogue', quantity: 1, unitPrice: 8000000, lineTotal: 8000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 20000000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: 'Milestone 2 covers the virtual walkthrough and asset library modules.',
+    internalNote: 'Amira has paid 12M. 8M remaining. Follow up before due date.',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedQuotationId: 'qtn-4',
+    relatedQuotationNumber: 'TGL-QTN-2026-004',
+    relatedDealId: 'dl-4',
+    relatedDealTitle: 'Amira Interiors Phase Two',
+    invoiceType: 'Milestone',
+    payments: [
+      { id: 'pay-3', date: 'Jun 10, 2026', amount: 12000000, method: 'Mobile Money', reference: 'MM-AI-20260610-001', notes: 'Partial milestone payment via mobile money.' },
+    ],
+    initials: 'AI',
+  },
+  {
+    id: 'inv-5',
+    number: 'TGL-INV-2026-005',
+    title: 'Standard Chartered Digital Cards — Full Project',
+    contactName: 'Esther Auma',
+    contactEmail: 'esther.a@email.com',
+    contactPhone: '+256 785 500 900',
+    companyName: 'Standard Chartered Uganda',
+    billingAddress: 'Plot 5, Speke Road, Kampala, Uganda',
+    description: 'Full project invoice for the digital business card platform as per quotation TGL-QTN-2026-003.',
+    total: 32000000,
+    amountPaid: 0,
+    balance: 32000000,
+    currency: 'UGX',
+    status: 'Draft',
+    issueDate: 'Jul 24, 2026',
+    dueDate: 'Aug 24, 2026',
+    lastUpdated: 'Jul 24, 2026',
+    lineItems: [
+      { id: 'ivli-11', item: 'Platform Development', description: 'Web and mobile-responsive digital card platform', quantity: 1, unitPrice: 15000000, lineTotal: 15000000 },
+      { id: 'ivli-12', item: 'NFC Integration', description: 'NFC tag provisioning and card writing system', quantity: 1, unitPrice: 8000000, lineTotal: 8000000 },
+      { id: 'ivli-13', item: 'Analytics Dashboard', description: 'Real-time card view and scan analytics', quantity: 1, unitPrice: 6000000, lineTotal: 6000000 },
+      { id: 'ivli-14', item: 'Team Management', description: 'Multi-user access with role-based permissions', quantity: 1, unitPrice: 3000000, lineTotal: 3000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 32000000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: '',
+    internalNote: 'Invoice prepared but not yet sent. Awaiting final approval on quotation.',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedQuotationId: 'qtn-3',
+    relatedQuotationNumber: 'TGL-QTN-2026-003',
+    invoiceType: 'Other',
+    payments: [],
+    initials: 'SC',
+  },
+  {
+    id: 'inv-6',
+    number: 'TGL-INV-2026-006',
+    title: 'Verax Mobile Application — Full Project',
+    contactName: 'Peter Okot',
+    contactEmail: 'peter.okot@email.com',
+    contactPhone: '+256 753 400 500',
+    companyName: 'Verax',
+    billingAddress: 'Plot 34, Clement Hill Road, Kampala, Uganda',
+    description: 'Full project invoice for the cross-platform mobile application as per quotation TGL-QTN-2026-005.',
+    total: 25000000,
+    amountPaid: 0,
+    balance: 25000000,
+    currency: 'UGX',
+    status: 'Sent',
+    issueDate: 'Jul 10, 2026',
+    dueDate: 'Aug 10, 2026',
+    lastUpdated: 'Jul 12, 2026',
+    lineItems: [
+      { id: 'ivli-15', item: 'Mobile App Development', description: 'React Native cross-platform application (iOS & Android)', quantity: 1, unitPrice: 15000000, lineTotal: 15000000 },
+      { id: 'ivli-16', item: 'Backend API', description: 'REST API with real-time notifications and data sync', quantity: 1, unitPrice: 7000000, lineTotal: 7000000 },
+      { id: 'ivli-17', item: 'Admin Dashboard', description: 'Web-based admin panel for content and user management', quantity: 1, unitPrice: 3000000, lineTotal: 3000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 25000000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: 'We appreciate your business and look forward to delivering this application.',
+    internalNote: '',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedQuotationId: 'qtn-5',
+    relatedQuotationNumber: 'TGL-QTN-2026-005',
+    invoiceType: 'Other',
+    payments: [],
+    initials: 'VX',
+  },
+  {
+    id: 'inv-7',
+    number: 'TGL-INV-2026-007',
+    title: 'StanChart Digital Platform — Final Invoice',
+    contactName: 'Robert Tumusiime',
+    contactEmail: 'robert.t@email.com',
+    contactPhone: '+256 714 800 900',
+    companyName: 'Standard Chartered Uganda',
+    billingAddress: 'Plot 5, Speke Road, Kampala, Uganda',
+    description: 'Final invoice for the digital platform project. Full project completion payment.',
+    total: 35000000,
+    amountPaid: 35000000,
+    balance: 0,
+    currency: 'UGX',
+    status: 'Paid',
+    issueDate: 'Jul 5, 2026',
+    dueDate: 'Aug 1, 2026',
+    lastUpdated: 'Jul 18, 2026',
+    lineItems: [
+      { id: 'ivli-18', item: 'Digital Platform Development', description: 'Full platform implementation and deployment', quantity: 1, unitPrice: 28000000, lineTotal: 28000000 },
+      { id: 'ivli-19', item: 'System Integration', description: 'Integration with existing banking systems', quantity: 1, unitPrice: 5000000, lineTotal: 5000000 },
+      { id: 'ivli-20', item: 'Training & Handover', description: 'Staff training and documentation', quantity: 1, unitPrice: 2000000, lineTotal: 2000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 35000000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: 'Thank you for partnering with Togashi Technologies. We trust the platform meets your expectations.',
+    internalNote: 'Project complete. Invoice paid in full.',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedProjectId: 'pr-6',
+    relatedProjectName: 'StanChart Digital Platform',
+    invoiceType: 'Final',
+    payments: [
+      { id: 'pay-4', date: 'Jul 18, 2026', amount: 35000000, method: 'Bank Transfer', reference: 'SCB-TRF-20260718-001', notes: 'Full payment received.' },
+    ],
+    initials: 'SC',
+  },
+  {
+    id: 'inv-8',
+    number: 'TGL-INV-2026-008',
+    title: 'MTN Uganda Self-Service Portal — Deposit',
+    contactName: 'Jane Kisakye',
+    contactEmail: 'jane.kisakye@email.com',
+    contactPhone: '+256 785 700 800',
+    companyName: 'MTN Uganda',
+    billingAddress: 'Plot 69/71, Jinja Road, Kampala, Uganda',
+    description: 'Deposit invoice for the customer self-service portal project as per quotation TGL-QTN-2026-008.',
+    total: 27500000,
+    amountPaid: 0,
+    balance: 27500000,
+    currency: 'UGX',
+    status: 'Draft',
+    issueDate: 'Jul 25, 2026',
+    dueDate: 'Aug 25, 2026',
+    lastUpdated: 'Jul 25, 2026',
+    lineItems: [
+      { id: 'ivli-21', item: 'Portal Frontend (Deposit)', description: '50% deposit for responsive web portal', quantity: 1, unitPrice: 9000000, lineTotal: 9000000 },
+      { id: 'ivli-22', item: 'Backend Integration (Deposit)', description: '50% deposit for core billing system integration', quantity: 1, unitPrice: 11000000, lineTotal: 11000000 },
+      { id: 'ivli-23', item: 'Payment Gateway (Deposit)', description: '50% deposit for mobile money integration', quantity: 1, unitPrice: 5000000, lineTotal: 5000000 },
+      { id: 'ivli-24', item: 'Support Ticketing (Deposit)', description: '50% deposit for customer service system', quantity: 1, unitPrice: 2500000, lineTotal: 2500000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 27500000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: '',
+    internalNote: 'Invoice still in draft. Pending management review before sending.',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedQuotationId: 'qtn-8',
+    relatedQuotationNumber: 'TGL-QTN-2026-008',
+    invoiceType: 'Deposit',
+    payments: [],
+    initials: 'MT',
+  },
+  {
+    id: 'inv-9',
+    number: 'TGL-INV-2026-009',
+    title: 'Crown Beverages Distributor Portal — Full Project',
+    contactName: 'Monica Birungi',
+    contactEmail: 'monica.b@email.com',
+    contactPhone: '+256 771 100 200',
+    companyName: 'Crown Beverages',
+    billingAddress: 'Plot 112/114, 6th Street, Industrial Area, Kampala, Uganda',
+    description: 'Full project invoice for the distributor management portal as per quotation TGL-QTN-2026-009.',
+    total: 22000000,
+    amountPaid: 3500000,
+    balance: 18500000,
+    currency: 'UGX',
+    status: 'Overdue',
+    issueDate: 'Jan 15, 2026',
+    dueDate: 'Feb 15, 2026',
+    lastUpdated: 'Feb 12, 2026',
+    lineItems: [
+      { id: 'ivli-25', item: 'Distributor Portal', description: 'Web-based distributor order and management system', quantity: 1, unitPrice: 12000000, lineTotal: 12000000 },
+      { id: 'ivli-26', item: 'Inventory Tracking', description: 'Real-time stock level monitoring and alerts', quantity: 1, unitPrice: 6000000, lineTotal: 6000000 },
+      { id: 'ivli-27', item: 'Sales Reporting', description: 'Automated sales reports and analytics dashboard', quantity: 1, unitPrice: 4000000, lineTotal: 4000000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 22000000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: 'This invoice is now overdue. Please arrange payment at your earliest convenience.',
+    internalNote: 'Overdue by several months. Multiple reminders sent. Escalate if no response.',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: 'Late payment may incur additional charges as per our terms.',
+    relatedQuotationId: 'qtn-9',
+    relatedQuotationNumber: 'TGL-QTN-2026-009',
+    invoiceType: 'Final',
+    payments: [
+      { id: 'pay-5', date: 'Feb 5, 2026', amount: 3500000, method: 'Mobile Money', reference: 'MM-CB-20260205-001', notes: 'Partial payment received. Balance remains outstanding.' },
+    ],
+    initials: 'CV',
+  },
+  {
+    id: 'inv-10',
+    number: 'TGL-INV-2026-010',
+    title: 'SafeBoda Fleet System — Deposit',
+    contactName: 'Michael Wasswa',
+    contactEmail: 'michael.w@email.com',
+    contactPhone: '+256 703 110 220',
+    companyName: 'SafeBoda',
+    billingAddress: 'Plot 21, Kanjokya Street, Kampala, Uganda',
+    description: 'Deposit invoice for the fleet management dashboard project.',
+    total: 11000000,
+    amountPaid: 11000000,
+    balance: 0,
+    currency: 'UGX',
+    status: 'Cancelled',
+    issueDate: 'Apr 16, 2026',
+    dueDate: 'May 16, 2026',
+    lastUpdated: 'May 3, 2026',
+    lineItems: [
+      { id: 'ivli-28', item: 'GPS Tracking System (Deposit)', description: '50% deposit for real-time location tracking', quantity: 1, unitPrice: 5000000, lineTotal: 5000000 },
+      { id: 'ivli-29', item: 'Driver Analytics (Deposit)', description: '50% deposit for performance metrics system', quantity: 1, unitPrice: 3500000, lineTotal: 3500000 },
+      { id: 'ivli-30', item: 'Maintenance Module (Deposit)', description: '50% deposit for vehicle maintenance tracking', quantity: 1, unitPrice: 2500000, lineTotal: 2500000 },
+    ],
+    discount: 0,
+    discountType: 'fixed',
+    tax: 0,
+    taxEnabled: false,
+    subtotal: 11000000,
+    paymentTerms: 'Payment is due by the stated due date. Please include the invoice number as the payment reference.',
+    clientNote: '',
+    internalNote: 'Invoice cancelled after quotation was rejected by the client.',
+    paymentInstructions: 'Bank: Stanbic Bank Uganda | Account: 9030012345678 | Account Name: Togashi Technologies Ltd',
+    additionalConditions: '',
+    relatedQuotationId: 'qtn-7',
+    relatedQuotationNumber: 'TGL-QTN-2026-007',
+    invoiceType: 'Deposit',
+    payments: [],
+    initials: 'SB',
+  },
+];
+
+// ============================================================================
+// RECEIPTS
+// ============================================================================
+
+export type ReceiptStatus = 'Issued' | 'Voided';
+export type ReceiptPaymentMethod = 'Bank Transfer' | 'Mobile Money' | 'Cash' | 'Cheque' | 'Other';
+
+export interface ReceiptVoidRecord {
+  voidedAt: string;
+  reason: string;
+}
+
+export interface Receipt {
+  id: string;
+  number: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  companyName: string;
+  billingAddress: string;
+  amount: number;
+  currency: 'UGX' | 'USD';
+  status: ReceiptStatus;
+  issueDate: string;
+  paymentDate: string;
+  lastUpdated: string;
+  paymentMethod: ReceiptPaymentMethod;
+  paymentMethodDescription?: string;
+  paymentReference: string;
+  relatedInvoiceId?: string;
+  relatedInvoiceNumber?: string;
+  clientNote: string;
+  internalNote: string;
+  initials: string;
+  voidRecord?: ReceiptVoidRecord;
+}
+
+export interface ReceiptStats {
+  total: number;
+  amountReceived: number;
+  thisMonth: number;
+  unlinked: number;
+}
+
+export const receiptStats: ReceiptStats = {
+  total: 10,
+  amountReceived: 97800000,
+  thisMonth: 3,
+  unlinked: 2,
+};
+
+export const receipts: Receipt[] = [
+  {
+    id: 'rct-1',
+    number: 'TGL-RCT-2026-001',
+    contactName: 'Grace Namugenyi',
+    contactEmail: 'grace.nam@email.com',
+    contactPhone: '+256 774 500 600',
+    companyName: 'Katrina Fashion Finds',
+    billingAddress: 'Plot 45, Ntinda Complex, Kampala, Uganda',
+    amount: 9000000,
+    currency: 'UGX',
+    status: 'Issued',
+    issueDate: 'Mar 28, 2026',
+    paymentDate: 'Mar 28, 2026',
+    lastUpdated: 'Mar 28, 2026',
+    paymentMethod: 'Bank Transfer',
+    paymentReference: 'STB-TRF-20260328-001',
+    relatedInvoiceId: 'inv-1',
+    relatedInvoiceNumber: 'TGL-INV-2026-001',
+    clientNote: 'Thank you for your prompt payment.',
+    internalNote: 'First deposit payment for Katrina Fashion Website.',
+    initials: 'KF',
+  },
+  {
+    id: 'rct-2',
+    number: 'TGL-RCT-2026-002',
+    contactName: 'Maria Nalubega',
+    contactEmail: 'maria.nalubega@email.com',
+    contactPhone: '+256 782 300 400',
+    companyName: 'Ellipse',
+    billingAddress: 'Plot 12, Acacia Avenue, Kololo, Kampala, Uganda',
+    amount: 25000000,
+    currency: 'UGX',
+    status: 'Issued',
+    issueDate: 'Mar 15, 2026',
+    paymentDate: 'Mar 15, 2026',
+    lastUpdated: 'Mar 15, 2026',
+    paymentMethod: 'Bank Transfer',
+    paymentReference: 'ELP-TRF-20260315-001',
+    relatedInvoiceId: 'inv-2',
+    relatedInvoiceNumber: 'TGL-INV-2026-002',
+    clientNote: 'Partial milestone payment received.',
+    internalNote: 'First milestone payment for Ellipse Enterprise Platform.',
+    initials: 'EP',
+  },
+  {
+    id: 'rct-3',
+    number: 'TGL-RCT-2026-003',
+    contactName: 'Sarah Achieng',
+    contactEmail: 'sarah.achieng@email.com',
+    contactPhone: '+256 772 100 200',
+    companyName: 'Amira Interiors',
+    billingAddress: 'Plot 89, Industrial Area, Nairobi, Kenya',
+    amount: 12000000,
+    currency: 'UGX',
+    status: 'Issued',
+    issueDate: 'Jun 10, 2026',
+    paymentDate: 'Jun 10, 2026',
+    lastUpdated: 'Jun 10, 2026',
+    paymentMethod: 'Mobile Money',
+    paymentReference: 'MM-AI-20260610-001',
+    relatedInvoiceId: 'inv-4',
+    relatedInvoiceNumber: 'TGL-INV-2026-004',
+    clientNote: '',
+    internalNote: 'Partial milestone payment via mobile money.',
+    initials: 'AI',
+  },
+  {
+    id: 'rct-4',
+    number: 'TGL-RCT-2026-004',
+    contactName: 'Robert Tumusiime',
+    contactEmail: 'robert.t@email.com',
+    contactPhone: '+256 714 800 900',
+    companyName: 'Standard Chartered Uganda',
+    billingAddress: 'Plot 5, Speke Road, Kampala, Uganda',
+    amount: 35000000,
+    currency: 'UGX',
+    status: 'Issued',
+    issueDate: 'Jul 18, 2026',
+    paymentDate: 'Jul 18, 2026',
+    lastUpdated: 'Jul 18, 2026',
+    paymentMethod: 'Bank Transfer',
+    paymentReference: 'SCB-TRF-20260718-001',
+    relatedInvoiceId: 'inv-7',
+    relatedInvoiceNumber: 'TGL-INV-2026-007',
+    clientNote: 'Full project payment received. Project complete.',
+    internalNote: 'Final payment for StanChart Digital Platform.',
+    initials: 'SC',
+  },
+  {
+    id: 'rct-5',
+    number: 'TGL-RCT-2026-005',
+    contactName: 'Monica Birungi',
+    contactEmail: 'monica.b@email.com',
+    contactPhone: '+256 771 100 200',
+    companyName: 'Crown Beverages',
+    billingAddress: 'Plot 112/114, 6th Street, Industrial Area, Kampala, Uganda',
+    amount: 3500000,
+    currency: 'UGX',
+    status: 'Issued',
+    issueDate: 'Feb 5, 2026',
+    paymentDate: 'Feb 5, 2026',
+    lastUpdated: 'Feb 5, 2026',
+    paymentMethod: 'Mobile Money',
+    paymentReference: 'MM-CB-20260205-001',
+    relatedInvoiceId: 'inv-9',
+    relatedInvoiceNumber: 'TGL-INV-2026-009',
+    clientNote: 'Partial payment received. Balance remains outstanding.',
+    internalNote: 'Partial payment for overdue Crown Beverages invoice.',
+    initials: 'CV',
+  },
+  {
+    id: 'rct-6',
+    number: 'TGL-RCT-2026-006',
+    contactName: 'Jane Kisakye',
+    contactEmail: 'jane.kisakye@email.com',
+    contactPhone: '+256 785 700 800',
+    companyName: 'MTN Uganda',
+    billingAddress: 'Plot 69/71, Jinja Road, Kampala, Uganda',
+    amount: 15000000,
+    currency: 'UGX',
+    status: 'Issued',
+    issueDate: 'Jul 22, 2026',
+    paymentDate: 'Jul 22, 2026',
+    lastUpdated: 'Jul 22, 2026',
+    paymentMethod: 'Cheque',
+    paymentReference: 'MTN-CHQ-20260722-001',
+    relatedInvoiceId: '',
+    relatedInvoiceNumber: '',
+    clientNote: '',
+    internalNote: 'Advance payment received. Invoice yet to be generated.',
+    initials: 'MT',
+  },
+  {
+    id: 'rct-7',
+    number: 'TGL-RCT-2026-007',
+    contactName: 'John Mukasa',
+    contactEmail: 'john.mukasa@email.com',
+    contactPhone: '+256 701 200 300',
+    companyName: 'Sparkles Salon Uganda',
+    billingAddress: 'Plot 78, Buganda Road, Kampala, Uganda',
+    amount: 4250000,
+    currency: 'UGX',
+    status: 'Issued',
+    issueDate: 'Jul 20, 2026',
+    paymentDate: 'Jul 20, 2026',
+    lastUpdated: 'Jul 20, 2026',
+    paymentMethod: 'Cash',
+    paymentReference: '',
+    relatedInvoiceId: 'inv-3',
+    relatedInvoiceNumber: 'TGL-INV-2026-003',
+    clientNote: 'Cash payment collected in person.',
+    internalNote: 'Full deposit collected in cash at client meeting.',
+    initials: 'SS',
+  },
+  {
+    id: 'rct-8',
+    number: 'TGL-RCT-2026-008',
+    contactName: 'Peter Okot',
+    contactEmail: 'peter.okot@email.com',
+    contactPhone: '+256 753 400 500',
+    companyName: 'Verax',
+    billingAddress: 'Plot 34, Clement Hill Road, Kampala, Uganda',
+    amount: 5000000,
+    currency: 'UGX',
+    status: 'Voided',
+    issueDate: 'Jun 30, 2026',
+    paymentDate: 'Jun 30, 2026',
+    lastUpdated: 'Jul 1, 2026',
+    paymentMethod: 'Bank Transfer',
+    paymentReference: 'VX-TRF-20260630-ERR',
+    relatedInvoiceId: 'inv-6',
+    relatedInvoiceNumber: 'TGL-INV-2026-006',
+    clientNote: '',
+    internalNote: 'Incorrect amount recorded. Voided and re-issued.',
+    initials: 'VX',
+    voidRecord: { voidedAt: 'Jul 1, 2026', reason: 'Incorrect payment amount. Correct amount should have been recorded separately.' },
+  },
+  {
+    id: 'rct-9',
+    number: 'TGL-RCT-2026-009',
+    contactName: 'David Ssempijja',
+    contactEmail: 'david.ssemp@email.com',
+    contactPhone: '+256 702 600 700',
+    companyName: 'Uganda Breweries',
+    billingAddress: 'Plot 56, Port Bell Road, Luzira, Kampala, Uganda',
+    amount: 12000000,
+    currency: 'UGX',
+    status: 'Issued',
+    issueDate: 'Jul 24, 2026',
+    paymentDate: 'Jul 23, 2026',
+    lastUpdated: 'Jul 24, 2026',
+    paymentMethod: 'Bank Transfer',
+    paymentReference: 'UBL-TRF-20260723-001',
+    relatedInvoiceId: '',
+    relatedInvoiceNumber: '',
+    clientNote: 'Advance payment for upcoming procurement portal project.',
+    internalNote: 'New client. Payment received before formal contract. Invoice to be created.',
+    initials: 'UB',
+  },
+  {
+    id: 'rct-10',
+    number: 'TGL-RCT-2026-010',
+    contactName: 'Michael Wasswa',
+    contactEmail: 'michael.w@email.com',
+    contactPhone: '+256 703 110 220',
+    companyName: 'SafeBoda',
+    billingAddress: 'Plot 21, Kanjokya Street, Kampala, Uganda',
+    amount: 3000000,
+    currency: 'UGX',
+    status: 'Voided',
+    issueDate: 'May 10, 2026',
+    paymentDate: 'May 10, 2026',
+    lastUpdated: 'May 12, 2026',
+    paymentMethod: 'Other',
+    paymentMethodDescription: 'Payment Link',
+    paymentReference: 'SB-PL-20260510-001',
+    relatedInvoiceId: 'inv-10',
+    relatedInvoiceNumber: 'TGL-INV-2026-010',
+    clientNote: '',
+    internalNote: 'Receipt voided after invoice was cancelled due to quotation rejection.',
+    initials: 'SB',
+    voidRecord: { voidedAt: 'May 12, 2026', reason: 'Linked invoice TGL-INV-2026-010 was cancelled after client rejected the quotation.' },
+  },
+];

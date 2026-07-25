@@ -16,6 +16,8 @@ import LeadDetail from '@/pages/leads/[id]';
 import Deals from '@/pages/deals';
 import DealDetail from '@/pages/deals/[id]';
 import Quotations from '@/pages/quotations';
+import Invoices from '@/pages/invoices';
+import Receipts from '@/pages/receipts';
 import Projects from '@/pages/projects';
 import ProjectDetail from '@/pages/projects/[id]';
 import Tasks from '@/pages/tasks';
@@ -54,6 +56,10 @@ function Router() {
               <Route path="/deals/:id" component={DealDetail} />
               
               <Route path="/quotations" component={Quotations} />
+              
+              <Route path="/invoices" component={Invoices} />
+              
+              <Route path="/receipts" component={Receipts} />
               
               <Route path="/projects" component={Projects} />
               <Route path="/projects/:id" component={ProjectDetail} />

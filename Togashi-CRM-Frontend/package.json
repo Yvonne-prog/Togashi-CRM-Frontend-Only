@@ -1,0 +1,16 @@
+{
+  "name": "togashi-crm-frontend-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @workspace/togashi-crm dev",
+    "build": "pnpm --filter @workspace/togashi-crm build",
+    "typecheck": "pnpm --filter @workspace/togashi-crm typecheck"
+  },
+  "devDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "4.62.2",
+    "@tailwindcss/oxide-win32-x64-msvc": "4.3.3",
+    "lightningcss-win32-x64-msvc": "1.32.0",
+    "typescript": "~5.9.3"
+  }
+}

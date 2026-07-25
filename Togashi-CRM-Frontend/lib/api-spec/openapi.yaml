@@ -1,0 +1,4075 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Togashi CRM API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: auth
+  - name: dashboard
+  - name: contacts
+  - name: companies
+  - name: leads
+  - name: deals
+  - name: projects
+  - name: tasks
+  - name: calendar
+  - name: documents
+  - name: communications
+  - name: notifications
+  - name: reports
+  - name: settings
+  - name: search
+  - name: activities
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # Auth
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  # Dashboard
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/pipeline:
+    get:
+      operationId: getDashboardPipeline
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Pipeline overview
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineStage"
+
+  /dashboard/priority-actions:
+    get:
+      operationId: getDashboardPriorityActions
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Priority actions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PriorityAction"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getDashboardRecentActivity
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+
+  /dashboard/todays-schedule:
+    get:
+      operationId: getDashboardTodaysSchedule
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Today's schedule
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CalendarEvent"
+
+  /dashboard/customer-health:
+    get:
+      operationId: getDashboardCustomerHealth
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Customer health summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerHealthSummary"
+
+  /dashboard/team-performance:
+    get:
+      operationId: getDashboardTeamPerformance
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Team performance
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeamPerformance"
+
+  # Contacts
+  /contacts:
+    get:
+      operationId: listContacts
+      tags: [contacts]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: assignedTo
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        "200":
+          description: List of contacts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactListResponse"
+    post:
+      operationId: createContact
+      tags: [contacts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+
+  /contacts/{id}:
+    get:
+      operationId: getContact
+      tags: [contacts]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Contact detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactDetail"
+    patch:
+      operationId: updateContact
+      tags: [contacts]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+    delete:
+      operationId: deleteContact
+      tags: [contacts]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /contacts/{id}/activities:
+    get:
+      operationId: getContactActivities
+      tags: [contacts]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Contact activities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+
+  /contacts/{id}/notes:
+    get:
+      operationId: getContactNotes
+      tags: [contacts]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Contact notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
+    post:
+      operationId: createContactNote
+      tags: [contacts]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoteInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+
+  /contacts/export:
+    get:
+      operationId: exportContacts
+      tags: [contacts]
+      responses:
+        "200":
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  # Companies
+  /companies:
+    get:
+      operationId: listCompanies
+      tags: [companies]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: industry
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        "200":
+          description: List of companies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyListResponse"
+    post:
+      operationId: createCompany
+      tags: [companies]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+  /companies/{id}:
+    get:
+      operationId: getCompany
+      tags: [companies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Company detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyDetail"
+    patch:
+      operationId: updateCompany
+      tags: [companies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+    delete:
+      operationId: deleteCompany
+      tags: [companies]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Leads
+  /leads:
+    get:
+      operationId: listLeads
+      tags: [leads]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: temperature
+          in: query
+          schema:
+            type: string
+        - name: assignedTo
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadListResponse"
+    post:
+      operationId: createLead
+      tags: [leads]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/{id}:
+    get:
+      operationId: getLead
+      tags: [leads]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lead detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+    patch:
+      operationId: updateLead
+      tags: [leads]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+    delete:
+      operationId: deleteLead
+      tags: [leads]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /leads/{id}/convert:
+    post:
+      operationId: convertLead
+      tags: [leads]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadConvertInput"
+      responses:
+        "200":
+          description: Converted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadConvertResult"
+
+  /leads/stats:
+    get:
+      operationId: getLeadStats
+      tags: [leads]
+      responses:
+        "200":
+          description: Lead stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadStats"
+
+  # Deals
+  /deals:
+    get:
+      operationId: listDeals
+      tags: [deals]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: stage
+          in: query
+          schema:
+            type: string
+        - name: assignedTo
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        "200":
+          description: List of deals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealListResponse"
+    post:
+      operationId: createDeal
+      tags: [deals]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/{id}:
+    get:
+      operationId: getDeal
+      tags: [deals]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deal detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealDetail"
+    patch:
+      operationId: updateDeal
+      tags: [deals]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+    delete:
+      operationId: deleteDeal
+      tags: [deals]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /deals/{id}/move-stage:
+    post:
+      operationId: moveDealStage
+      tags: [deals]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MoveStageInput"
+      responses:
+        "200":
+          description: Stage moved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/{id}/create-project:
+    post:
+      operationId: createProjectFromDeal
+      tags: [deals]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectFromDealInput"
+      responses:
+        "201":
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+
+  /deals/pipeline-summary:
+    get:
+      operationId: getDealPipelineSummary
+      tags: [deals]
+      responses:
+        "200":
+          description: Pipeline summary by stage
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineStage"
+
+  # Projects
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectListResponse"
+    post:
+      operationId: createProject
+      tags: [projects]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Project detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetail"
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /projects/{id}/milestones:
+    get:
+      operationId: listProjectMilestones
+      tags: [projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Milestones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Milestone"
+    post:
+      operationId: createMilestone
+      tags: [projects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MilestoneInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+
+  # Tasks
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: priority
+          in: query
+          schema:
+            type: string
+        - name: assignedTo
+          in: query
+          schema:
+            type: string
+        - name: projectId
+          in: query
+          schema:
+            type: string
+        - name: overdue
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskListResponse"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    get:
+      operationId: getTask
+      tags: [tasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Task detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskDetail"
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /tasks/{id}/complete:
+    post:
+      operationId: completeTask
+      tags: [tasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}/comments:
+    get:
+      operationId: listTaskComments
+      tags: [tasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskComment"
+    post:
+      operationId: createTaskComment
+      tags: [tasks]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCommentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskComment"
+
+  # Calendar
+  /calendar/events:
+    get:
+      operationId: listCalendarEvents
+      tags: [calendar]
+      parameters:
+        - name: start
+          in: query
+          schema:
+            type: string
+        - name: end
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Events list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CalendarEvent"
+    post:
+      operationId: createCalendarEvent
+      tags: [calendar]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarEventInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarEvent"
+
+  /calendar/events/{id}:
+    get:
+      operationId: getCalendarEvent
+      tags: [calendar]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Event detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarEvent"
+    patch:
+      operationId: updateCalendarEvent
+      tags: [calendar]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarEventUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarEvent"
+    delete:
+      operationId: deleteCalendarEvent
+      tags: [calendar]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Documents
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [documents]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: relatedType
+          in: query
+          schema:
+            type: string
+        - name: relatedId
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentListResponse"
+    post:
+      operationId: createDocument
+      tags: [documents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+
+  /documents/{id}:
+    get:
+      operationId: getDocument
+      tags: [documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+    patch:
+      operationId: updateDocument
+      tags: [documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+    delete:
+      operationId: deleteDocument
+      tags: [documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Communications
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [communications]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: channel
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationListResponse"
+    post:
+      operationId: createConversation
+      tags: [communications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /conversations/{id}:
+    get:
+      operationId: getConversation
+      tags: [communications]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationDetail"
+    patch:
+      operationId: updateConversation
+      tags: [communications]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /conversations/{id}/messages:
+    post:
+      operationId: sendMessage
+      tags: [communications]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Communication"
+
+  # Notifications
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationListResponse"
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /notifications/mark-all-read:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      responses:
+        "200":
+          description: All marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /notifications/{id}:
+    delete:
+      operationId: deleteNotification
+      tags: [notifications]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # Reports
+  /reports/sales:
+    get:
+      operationId: getSalesReport
+      tags: [reports]
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+        - name: groupBy
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sales report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SalesReport"
+
+  /reports/leads:
+    get:
+      operationId: getLeadsReport
+      tags: [reports]
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leads report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadsReport"
+
+  /reports/projects:
+    get:
+      operationId: getProjectsReport
+      tags: [reports]
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Projects report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectsReport"
+
+  /reports/tasks:
+    get:
+      operationId: getTasksReport
+      tags: [reports]
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tasks report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TasksReport"
+
+  /reports/team:
+    get:
+      operationId: getTeamReport
+      tags: [reports]
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Team report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamReport"
+
+  # Settings - Users
+  /settings/users:
+    get:
+      operationId: listUsers
+      tags: [settings]
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+    post:
+      operationId: createUser
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /settings/users/{id}:
+    get:
+      operationId: getUser
+      tags: [settings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    patch:
+      operationId: updateUser
+      tags: [settings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /settings/departments:
+    get:
+      operationId: listDepartments
+      tags: [settings]
+      responses:
+        "200":
+          description: Departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Department"
+    post:
+      operationId: createDepartment
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+
+  /settings/departments/{id}:
+    patch:
+      operationId: updateDepartment
+      tags: [settings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+    delete:
+      operationId: deleteDepartment
+      tags: [settings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /settings/organization:
+    get:
+      operationId: getOrganization
+      tags: [settings]
+      responses:
+        "200":
+          description: Organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+    patch:
+      operationId: updateOrganization
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+
+  /settings/profile:
+    patch:
+      operationId: updateProfile
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /settings/audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [settings]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogListResponse"
+
+  # Global Search
+  /search:
+    get:
+      operationId: globalSearch
+      tags: [search]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+
+  # Activities
+  /activities:
+    get:
+      operationId: listActivities
+      tags: [activities]
+      parameters:
+        - name: entityType
+          in: query
+          schema:
+            type: string
+        - name: entityId
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Activities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    # Auth schemas
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    RegisterInput:
+      type: object
+      required: [firstName, lastName, email, password]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [user]
+      properties:
+        user:
+          $ref: "#/components/schemas/UserProfile"
+
+    UserProfile:
+      type: object
+      required: [id, firstName, lastName, email, role]
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        department:
+          type: ["string", "null"]
+        departmentId:
+          type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        avatar:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+
+    UserInput:
+      type: object
+      required: [firstName, lastName, email, role, password]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        password:
+          type: string
+        departmentId:
+          type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+
+    UserUpdate:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+        departmentId:
+          type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+
+    ProfileUpdate:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        jobTitle:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+
+    UserListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserProfile"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # Organization
+    Organization:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        legalName:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        currency:
+          type: string
+        timezone:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+
+    OrganizationUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        legalName:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        currency:
+          type: string
+        timezone:
+          type: string
+
+    # Department
+    Department:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        managerId:
+          type: ["string", "null"]
+        managerName:
+          type: ["string", "null"]
+        memberCount:
+          type: integer
+
+    DepartmentInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        managerId:
+          type: ["string", "null"]
+
+    DepartmentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        managerId:
+          type: ["string", "null"]
+
+    # Dashboard schemas
+    DashboardStats:
+      type: object
+      required: [totalRevenue, revenueThisMonth, activeCustomers, openLeads, activeDeals, pipelineValue, activeProjects, openTasks, overdueTasks, upcomingMeetings]
+      properties:
+        totalRevenue:
+          type: number
+        revenueThisMonth:
+          type: number
+        revenueLastMonth:
+          type: number
+        activeCustomers:
+          type: integer
+        openLeads:
+          type: integer
+        newLeadsThisMonth:
+          type: integer
+        activeDeals:
+          type: integer
+        pipelineValue:
+          type: number
+        activeProjects:
+          type: integer
+        openTasks:
+          type: integer
+        overdueTasks:
+          type: integer
+        upcomingMeetings:
+          type: integer
+
+    PipelineStage:
+      type: object
+      required: [stage, count, value, weightedValue]
+      properties:
+        stage:
+          type: string
+        count:
+          type: integer
+        value:
+          type: number
+        weightedValue:
+          type: number
+        probability:
+          type: number
+
+    PriorityAction:
+      type: object
+      required: [id, type, title, priority, dueDate]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        priority:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        relatedRecord:
+          type: ["string", "null"]
+        relatedId:
+          type: ["string", "null"]
+
+    CustomerHealthSummary:
+      type: object
+      required: [healthy, needsAttention, atRisk]
+      properties:
+        healthy:
+          type: integer
+        needsAttention:
+          type: integer
+        atRisk:
+          type: integer
+
+    TeamPerformance:
+      type: object
+      required: [userId, name, dealsWon, revenue, tasksCompleted, followUps]
+      properties:
+        userId:
+          type: string
+        name:
+          type: string
+        avatar:
+          type: ["string", "null"]
+        dealsWon:
+          type: integer
+        revenue:
+          type: number
+        tasksCompleted:
+          type: integer
+        followUps:
+          type: integer
+
+    # Contact schemas
+    Contact:
+      type: object
+      required: [id, firstName, lastName, email]
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        alternativePhone:
+          type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        companyName:
+          type: ["string", "null"]
+        type:
+          type: string
+        status:
+          type: string
+        assignedTo:
+          type: ["string", "null"]
+        assignedToName:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        preferredChannel:
+          type: ["string", "null"]
+        lastContactedAt:
+          type: ["string", "null"]
+        nextFollowUpAt:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ContactDetail:
+      allOf:
+        - $ref: "#/components/schemas/Contact"
+        - type: object
+          properties:
+            notes:
+              type: ["string", "null"]
+            deals:
+              type: array
+              items:
+                $ref: "#/components/schemas/Deal"
+            tasks:
+              type: array
+              items:
+                $ref: "#/components/schemas/Task"
+            recentActivities:
+              type: array
+              items:
+                $ref: "#/components/schemas/Activity"
+
+    ContactInput:
+      type: object
+      required: [firstName, lastName, email]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        alternativePhone:
+          type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        type:
+          type: string
+        status:
+          type: string
+        assignedTo:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        preferredChannel:
+          type: ["string", "null"]
+        nextFollowUpAt:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+
+    ContactUpdate:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        alternativePhone:
+          type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        type:
+          type: string
+        status:
+          type: string
+        assignedTo:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        preferredChannel:
+          type: ["string", "null"]
+        nextFollowUpAt:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+
+    ContactListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contact"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # Company schemas
+    Company:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        legalName:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        size:
+          type: ["string", "null"]
+        annualRevenue:
+          type: ["number", "null"]
+        accountOwnerId:
+          type: ["string", "null"]
+        accountOwnerName:
+          type: ["string", "null"]
+        status:
+          type: string
+        taxNumber:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        contactCount:
+          type: integer
+        dealCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    CompanyDetail:
+      allOf:
+        - $ref: "#/components/schemas/Company"
+        - type: object
+          properties:
+            contacts:
+              type: array
+              items:
+                $ref: "#/components/schemas/Contact"
+            deals:
+              type: array
+              items:
+                $ref: "#/components/schemas/Deal"
+            projects:
+              type: array
+              items:
+                $ref: "#/components/schemas/Project"
+            recentActivities:
+              type: array
+              items:
+                $ref: "#/components/schemas/Activity"
+
+    CompanyInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        legalName:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        size:
+          type: ["string", "null"]
+        annualRevenue:
+          type: ["number", "null"]
+        accountOwnerId:
+          type: ["string", "null"]
+        status:
+          type: string
+        taxNumber:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    CompanyUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        legalName:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        size:
+          type: ["string", "null"]
+        annualRevenue:
+          type: ["number", "null"]
+        accountOwnerId:
+          type: ["string", "null"]
+        status:
+          type: string
+        taxNumber:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    CompanyListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Company"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # Lead schemas
+    Lead:
+      type: object
+      required: [id, name, email, status]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        interest:
+          type: ["string", "null"]
+        estimatedBudget:
+          type: ["number", "null"]
+        currency:
+          type: string
+        status:
+          type: string
+        score:
+          type: integer
+        temperature:
+          type: string
+        ownerId:
+          type: ["string", "null"]
+        ownerName:
+          type: ["string", "null"]
+        expectedDecisionDate:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        lastInteractionAt:
+          type: ["string", "null"]
+        nextAction:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    LeadInput:
+      type: object
+      required: [name, email, status]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        interest:
+          type: ["string", "null"]
+        estimatedBudget:
+          type: ["number", "null"]
+        currency:
+          type: string
+        status:
+          type: string
+        temperature:
+          type: string
+        ownerId:
+          type: ["string", "null"]
+        expectedDecisionDate:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        nextAction:
+          type: ["string", "null"]
+
+    LeadUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        interest:
+          type: ["string", "null"]
+        estimatedBudget:
+          type: ["number", "null"]
+        currency:
+          type: string
+        status:
+          type: string
+        temperature:
+          type: string
+        ownerId:
+          type: ["string", "null"]
+        expectedDecisionDate:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        nextAction:
+          type: ["string", "null"]
+
+    LeadConvertInput:
+      type: object
+      properties:
+        createContact:
+          type: boolean
+        createCompany:
+          type: boolean
+        createDeal:
+          type: boolean
+        dealTitle:
+          type: ["string", "null"]
+        dealValue:
+          type: ["number", "null"]
+        dealStage:
+          type: ["string", "null"]
+
+    LeadConvertResult:
+      type: object
+      properties:
+        contactId:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        dealId:
+          type: ["string", "null"]
+
+    LeadStats:
+      type: object
+      required: [total, byStatus, byTemperature, bySource]
+      properties:
+        total:
+          type: integer
+        byStatus:
+          type: array
+          items:
+            type: object
+            required: [status, count]
+            properties:
+              status:
+                type: string
+              count:
+                type: integer
+        byTemperature:
+          type: array
+          items:
+            type: object
+            required: [temperature, count]
+            properties:
+              temperature:
+                type: string
+              count:
+                type: integer
+        bySource:
+          type: array
+          items:
+            type: object
+            required: [source, count]
+            properties:
+              source:
+                type: string
+              count:
+                type: integer
+
+    LeadListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lead"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # Deal schemas
+    Deal:
+      type: object
+      required: [id, title, stage, value]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        contactId:
+          type: ["string", "null"]
+        contactName:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        companyName:
+          type: ["string", "null"]
+        value:
+          type: number
+        currency:
+          type: string
+        stage:
+          type: string
+        probability:
+          type: integer
+        expectedCloseDate:
+          type: ["string", "null"]
+        ownerId:
+          type: ["string", "null"]
+        ownerName:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        nextAction:
+          type: ["string", "null"]
+        lostReason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    DealDetail:
+      allOf:
+        - $ref: "#/components/schemas/Deal"
+        - type: object
+          properties:
+            tasks:
+              type: array
+              items:
+                $ref: "#/components/schemas/Task"
+            activities:
+              type: array
+              items:
+                $ref: "#/components/schemas/Activity"
+            stageHistory:
+              type: array
+              items:
+                $ref: "#/components/schemas/DealStageHistory"
+
+    DealStageHistory:
+      type: object
+      required: [id, stage, movedAt]
+      properties:
+        id:
+          type: string
+        stage:
+          type: string
+        movedAt:
+          type: string
+        movedBy:
+          type: ["string", "null"]
+
+    DealInput:
+      type: object
+      required: [title, stage, value]
+      properties:
+        title:
+          type: string
+        contactId:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        value:
+          type: number
+        currency:
+          type: string
+        stage:
+          type: string
+        probability:
+          type: integer
+        expectedCloseDate:
+          type: ["string", "null"]
+        ownerId:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        nextAction:
+          type: ["string", "null"]
+
+    DealUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        contactId:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        value:
+          type: number
+        currency:
+          type: string
+        stage:
+          type: string
+        probability:
+          type: integer
+        expectedCloseDate:
+          type: ["string", "null"]
+        ownerId:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        nextAction:
+          type: ["string", "null"]
+        lostReason:
+          type: ["string", "null"]
+
+    MoveStageInput:
+      type: object
+      required: [stage]
+      properties:
+        stage:
+          type: string
+        lostReason:
+          type: ["string", "null"]
+
+    ProjectFromDealInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+        deadline:
+          type: ["string", "null"]
+        managerId:
+          type: ["string", "null"]
+
+    DealListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Deal"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # Project schemas
+    Project:
+      type: object
+      required: [id, name, status]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        companyName:
+          type: ["string", "null"]
+        primaryContactId:
+          type: ["string", "null"]
+        primaryContactName:
+          type: ["string", "null"]
+        dealId:
+          type: ["string", "null"]
+        managerId:
+          type: ["string", "null"]
+        managerName:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+        deadline:
+          type: ["string", "null"]
+        budget:
+          type: ["number", "null"]
+        currency:
+          type: string
+        status:
+          type: string
+        progress:
+          type: integer
+        memberCount:
+          type: integer
+        taskCount:
+          type: integer
+        completedTaskCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ProjectDetail:
+      allOf:
+        - $ref: "#/components/schemas/Project"
+        - type: object
+          properties:
+            members:
+              type: array
+              items:
+                $ref: "#/components/schemas/UserProfile"
+            tasks:
+              type: array
+              items:
+                $ref: "#/components/schemas/Task"
+            milestones:
+              type: array
+              items:
+                $ref: "#/components/schemas/Milestone"
+            activities:
+              type: array
+              items:
+                $ref: "#/components/schemas/Activity"
+
+    ProjectInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        primaryContactId:
+          type: ["string", "null"]
+        dealId:
+          type: ["string", "null"]
+        managerId:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+        deadline:
+          type: ["string", "null"]
+        budget:
+          type: ["number", "null"]
+        currency:
+          type: string
+        status:
+          type: string
+        memberIds:
+          type: array
+          items:
+            type: string
+
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        primaryContactId:
+          type: ["string", "null"]
+        managerId:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+        deadline:
+          type: ["string", "null"]
+        budget:
+          type: ["number", "null"]
+        currency:
+          type: string
+        status:
+          type: string
+        progress:
+          type: integer
+        memberIds:
+          type: array
+          items:
+            type: string
+
+    ProjectListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Project"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    Milestone:
+      type: object
+      required: [id, title, projectId]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        projectId:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        isCompleted:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
+
+    MilestoneInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+
+    # Task schemas
+    Task:
+      type: object
+      required: [id, title, status, priority]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        assigneeId:
+          type: ["string", "null"]
+        assigneeName:
+          type: ["string", "null"]
+        creatorId:
+          type: ["string", "null"]
+        priority:
+          type: string
+        status:
+          type: string
+        startDate:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        completedAt:
+          type: ["string", "null"]
+        relatedContactId:
+          type: ["string", "null"]
+        relatedContactName:
+          type: ["string", "null"]
+        relatedCompanyId:
+          type: ["string", "null"]
+        relatedCompanyName:
+          type: ["string", "null"]
+        relatedLeadId:
+          type: ["string", "null"]
+        relatedDealId:
+          type: ["string", "null"]
+        relatedDealTitle:
+          type: ["string", "null"]
+        relatedProjectId:
+          type: ["string", "null"]
+        relatedProjectName:
+          type: ["string", "null"]
+        checklistTotal:
+          type: integer
+        checklistCompleted:
+          type: integer
+        commentCount:
+          type: integer
+        isOverdue:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    TaskDetail:
+      allOf:
+        - $ref: "#/components/schemas/Task"
+        - type: object
+          properties:
+            checklist:
+              type: array
+              items:
+                $ref: "#/components/schemas/ChecklistItem"
+            comments:
+              type: array
+              items:
+                $ref: "#/components/schemas/TaskComment"
+
+    TaskInput:
+      type: object
+      required: [title, priority, status]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        assigneeId:
+          type: ["string", "null"]
+        priority:
+          type: string
+        status:
+          type: string
+        startDate:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        relatedContactId:
+          type: ["string", "null"]
+        relatedCompanyId:
+          type: ["string", "null"]
+        relatedLeadId:
+          type: ["string", "null"]
+        relatedDealId:
+          type: ["string", "null"]
+        relatedProjectId:
+          type: ["string", "null"]
+        checklist:
+          type: array
+          items:
+            type: string
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        assigneeId:
+          type: ["string", "null"]
+        priority:
+          type: string
+        status:
+          type: string
+        startDate:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        relatedContactId:
+          type: ["string", "null"]
+        relatedCompanyId:
+          type: ["string", "null"]
+        relatedLeadId:
+          type: ["string", "null"]
+        relatedDealId:
+          type: ["string", "null"]
+        relatedProjectId:
+          type: ["string", "null"]
+
+    TaskListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Task"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    ChecklistItem:
+      type: object
+      required: [id, title, isCompleted]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        isCompleted:
+          type: boolean
+
+    TaskComment:
+      type: object
+      required: [id, content, authorId, authorName, createdAt]
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        authorId:
+          type: string
+        authorName:
+          type: string
+        createdAt:
+          type: string
+
+    TaskCommentInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    # Calendar schemas
+    CalendarEvent:
+      type: object
+      required: [id, title, startTime, endTime, type]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        startTime:
+          type: string
+        endTime:
+          type: string
+        location:
+          type: ["string", "null"]
+        meetingLink:
+          type: ["string", "null"]
+        type:
+          type: string
+        ownerId:
+          type: ["string", "null"]
+        ownerName:
+          type: ["string", "null"]
+        relatedContactId:
+          type: ["string", "null"]
+        relatedContactName:
+          type: ["string", "null"]
+        relatedCompanyId:
+          type: ["string", "null"]
+        relatedDealId:
+          type: ["string", "null"]
+        relatedProjectId:
+          type: ["string", "null"]
+        attendees:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+
+    CalendarEventInput:
+      type: object
+      required: [title, startTime, endTime, type]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        startTime:
+          type: string
+        endTime:
+          type: string
+        location:
+          type: ["string", "null"]
+        meetingLink:
+          type: ["string", "null"]
+        type:
+          type: string
+        relatedContactId:
+          type: ["string", "null"]
+        relatedCompanyId:
+          type: ["string", "null"]
+        relatedDealId:
+          type: ["string", "null"]
+        relatedProjectId:
+          type: ["string", "null"]
+        attendeeIds:
+          type: array
+          items:
+            type: string
+
+    CalendarEventUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        startTime:
+          type: string
+        endTime:
+          type: string
+        location:
+          type: ["string", "null"]
+        meetingLink:
+          type: ["string", "null"]
+        type:
+          type: string
+        relatedContactId:
+          type: ["string", "null"]
+        relatedCompanyId:
+          type: ["string", "null"]
+        relatedDealId:
+          type: ["string", "null"]
+        relatedProjectId:
+          type: ["string", "null"]
+        attendeeIds:
+          type: array
+          items:
+            type: string
+
+    # Document schemas
+    Document:
+      type: object
+      required: [id, name, category]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+        fileType:
+          type: ["string", "null"]
+        fileSize:
+          type: ["integer", "null"]
+        fileUrl:
+          type: ["string", "null"]
+        relatedType:
+          type: ["string", "null"]
+        relatedId:
+          type: ["string", "null"]
+        relatedName:
+          type: ["string", "null"]
+        uploadedById:
+          type: ["string", "null"]
+        uploadedByName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    DocumentInput:
+      type: object
+      required: [name, category]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+        fileType:
+          type: ["string", "null"]
+        fileSize:
+          type: ["integer", "null"]
+        fileUrl:
+          type: ["string", "null"]
+        relatedType:
+          type: ["string", "null"]
+        relatedId:
+          type: ["string", "null"]
+
+    DocumentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+
+    DocumentListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Document"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # Communication schemas
+    Conversation:
+      type: object
+      required: [id, subject, channel, status]
+      properties:
+        id:
+          type: string
+        subject:
+          type: string
+        channel:
+          type: string
+        status:
+          type: string
+        contactId:
+          type: ["string", "null"]
+        contactName:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        companyName:
+          type: ["string", "null"]
+        dealId:
+          type: ["string", "null"]
+        projectId:
+          type: ["string", "null"]
+        assignedToId:
+          type: ["string", "null"]
+        assignedToName:
+          type: ["string", "null"]
+        unreadCount:
+          type: integer
+        lastMessageAt:
+          type: ["string", "null"]
+        lastMessagePreview:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ConversationDetail:
+      allOf:
+        - $ref: "#/components/schemas/Conversation"
+        - type: object
+          properties:
+            messages:
+              type: array
+              items:
+                $ref: "#/components/schemas/Communication"
+
+    ConversationInput:
+      type: object
+      required: [subject, channel]
+      properties:
+        subject:
+          type: string
+        channel:
+          type: string
+        contactId:
+          type: ["string", "null"]
+        companyId:
+          type: ["string", "null"]
+        dealId:
+          type: ["string", "null"]
+        projectId:
+          type: ["string", "null"]
+        assignedToId:
+          type: ["string", "null"]
+
+    ConversationUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+        assignedToId:
+          type: ["string", "null"]
+
+    Communication:
+      type: object
+      required: [id, content, direction, createdAt]
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        direction:
+          type: string
+        authorId:
+          type: ["string", "null"]
+        authorName:
+          type: ["string", "null"]
+        isInternal:
+          type: boolean
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+
+    MessageInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+        isInternal:
+          type: boolean
+
+    ConversationListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # Notification schemas
+    Notification:
+      type: object
+      required: [id, title, message, type, isRead, createdAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+        isRead:
+          type: boolean
+        relatedType:
+          type: ["string", "null"]
+        relatedId:
+          type: ["string", "null"]
+        relatedTitle:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    NotificationListResponse:
+      type: object
+      required: [data, total, unreadCount, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notification"
+        total:
+          type: integer
+        unreadCount:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # Report schemas
+    SalesReport:
+      type: object
+      required: [totalRevenue, totalDeals, wonDeals, lostDeals, winRate, avgDealValue, revenueByPeriod, revenueByOwner, dealsByStage, lostReasons]
+      properties:
+        totalRevenue:
+          type: number
+        totalDeals:
+          type: integer
+        wonDeals:
+          type: integer
+        lostDeals:
+          type: integer
+        winRate:
+          type: number
+        avgDealValue:
+          type: number
+        avgSaleCycleDays:
+          type: number
+        revenueByPeriod:
+          type: array
+          items:
+            type: object
+            required: [period, revenue, deals]
+            properties:
+              period:
+                type: string
+              revenue:
+                type: number
+              deals:
+                type: integer
+        revenueByOwner:
+          type: array
+          items:
+            type: object
+            required: [ownerId, ownerName, revenue, deals]
+            properties:
+              ownerId:
+                type: string
+              ownerName:
+                type: string
+              revenue:
+                type: number
+              deals:
+                type: integer
+        dealsByStage:
+          type: array
+          items:
+            type: object
+            required: [stage, count, value]
+            properties:
+              stage:
+                type: string
+              count:
+                type: integer
+              value:
+                type: number
+        lostReasons:
+          type: array
+          items:
+            type: object
+            required: [reason, count]
+            properties:
+              reason:
+                type: string
+              count:
+                type: integer
+
+    LeadsReport:
+      type: object
+      required: [totalLeads, newLeads, convertedLeads, lostLeads, conversionRate, bySource, byStatus, byTemperature, scoreDistribution]
+      properties:
+        totalLeads:
+          type: integer
+        newLeads:
+          type: integer
+        convertedLeads:
+          type: integer
+        lostLeads:
+          type: integer
+        conversionRate:
+          type: number
+        bySource:
+          type: array
+          items:
+            type: object
+            required: [source, count, converted]
+            properties:
+              source:
+                type: string
+              count:
+                type: integer
+              converted:
+                type: integer
+        byStatus:
+          type: array
+          items:
+            type: object
+            required: [status, count]
+            properties:
+              status:
+                type: string
+              count:
+                type: integer
+        byTemperature:
+          type: array
+          items:
+            type: object
+            required: [temperature, count]
+            properties:
+              temperature:
+                type: string
+              count:
+                type: integer
+        scoreDistribution:
+          type: array
+          items:
+            type: object
+            required: [range, count]
+            properties:
+              range:
+                type: string
+              count:
+                type: integer
+
+    ProjectsReport:
+      type: object
+      required: [totalProjects, byStatus, onTime, delayed, atRisk, completedThisPeriod, budgetUtilization]
+      properties:
+        totalProjects:
+          type: integer
+        byStatus:
+          type: array
+          items:
+            type: object
+            required: [status, count]
+            properties:
+              status:
+                type: string
+              count:
+                type: integer
+        onTime:
+          type: integer
+        delayed:
+          type: integer
+        atRisk:
+          type: integer
+        completedThisPeriod:
+          type: integer
+        budgetUtilization:
+          type: number
+
+    TasksReport:
+      type: object
+      required: [total, completed, overdue, byPriority, byStatus, completionRate, byAssignee]
+      properties:
+        total:
+          type: integer
+        completed:
+          type: integer
+        overdue:
+          type: integer
+        byPriority:
+          type: array
+          items:
+            type: object
+            required: [priority, count]
+            properties:
+              priority:
+                type: string
+              count:
+                type: integer
+        byStatus:
+          type: array
+          items:
+            type: object
+            required: [status, count]
+            properties:
+              status:
+                type: string
+              count:
+                type: integer
+        completionRate:
+          type: number
+        byAssignee:
+          type: array
+          items:
+            type: object
+            required: [assigneeId, assigneeName, total, completed, overdue]
+            properties:
+              assigneeId:
+                type: string
+              assigneeName:
+                type: string
+              total:
+                type: integer
+              completed:
+                type: integer
+              overdue:
+                type: integer
+
+    TeamReport:
+      type: object
+      required: [members]
+      properties:
+        members:
+          type: array
+          items:
+            type: object
+            required: [userId, name, dealsWon, revenue, tasksCompleted, followUps, activityCount]
+            properties:
+              userId:
+                type: string
+              name:
+                type: string
+              avatar:
+                type: ["string", "null"]
+              dealsWon:
+                type: integer
+              revenue:
+                type: number
+              tasksCompleted:
+                type: integer
+              followUps:
+                type: integer
+              activityCount:
+                type: integer
+
+    # Note schema
+    Note:
+      type: object
+      required: [id, content, authorId, authorName, createdAt]
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        authorId:
+          type: string
+        authorName:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    NoteInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    # Activity schema
+    Activity:
+      type: object
+      required: [id, type, description, createdAt]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        entityType:
+          type: ["string", "null"]
+        entityId:
+          type: ["string", "null"]
+        entityName:
+          type: ["string", "null"]
+        performedById:
+          type: ["string", "null"]
+        performedByName:
+          type: ["string", "null"]
+        metadata:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    # Search schemas
+    SearchResults:
+      type: object
+      required: [contacts, companies, leads, deals, projects, tasks]
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+        companies:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+        leads:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+        deals:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+        projects:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+        tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+
+    SearchResult:
+      type: object
+      required: [id, type, title]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+
+    # Audit Log
+    AuditLog:
+      type: object
+      required: [id, action, entityType, performedByName, createdAt]
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: ["string", "null"]
+        entityName:
+          type: ["string", "null"]
+        performedById:
+          type: ["string", "null"]
+        performedByName:
+          type: string
+        ipAddress:
+          type: ["string", "null"]
+        details:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AuditLogListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer

@@ -83,28 +83,28 @@ export default function CalendarPage() {
   }, [view, currentDate, weekStart, weekEnd]);
 
   return (
-    <div className="h-[calc(100vh-64px)] -m-5 md:-m-6 p-5 md:p-6 flex flex-col bg-[#F7F7F5] overflow-auto">
+    <div className="h-[calc(100vh-64px)] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 flex flex-col bg-[#F7F7F5] overflow-auto">
       {/* Top Control Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 shrink-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <div className="flex items-center bg-white rounded-lg border border-slate-200 shadow-[0_1px_3px_rgba(15,23,42,0.04)] overflow-hidden">
-            <button onClick={() => navigate(-1)} className="px-2.5 py-1.5 hover:bg-slate-50 text-slate-600 transition-colors border-r border-slate-200">
+            <button onClick={() => navigate(-1)} className="px-2.5 py-2 hover:bg-slate-50 text-slate-600 transition-colors border-r border-slate-200">
               <ArrowLeft size={14} variant="Linear" color="currentColor" />
             </button>
-            <button onClick={goToday} className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors border-r border-slate-200">Today</button>
-            <button onClick={() => navigate(1)} className="px-2.5 py-1.5 hover:bg-slate-50 text-slate-600 transition-colors">
+            <button onClick={goToday} className="px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors border-r border-slate-200">Today</button>
+            <button onClick={() => navigate(1)} className="px-2.5 py-2 hover:bg-slate-50 text-slate-600 transition-colors">
               <ArrowRight size={14} variant="Linear" color="currentColor" />
             </button>
           </div>
-          <h2 className="text-lg font-semibold tracking-tight text-slate-900">{headerLabel}</h2>
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-slate-900">{headerLabel}</h2>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="bg-white rounded-lg border border-slate-200 p-1 flex shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="bg-white rounded-lg border border-slate-200 p-1 flex shadow-[0_1px_3px_rgba(15,23,42,0.04)] flex-1 sm:flex-initial">
             {(['month', 'week', 'day', 'agenda'] as ViewMode[]).map((v) => (
-              <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 rounded-md text-xs font-semibold capitalize transition-colors ${view === v ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}>{v}</button>
+              <button key={v} onClick={() => setView(v)} className={`flex-1 sm:flex-initial px-2 sm:px-3 py-2 sm:py-1.5 rounded-md text-xs font-semibold capitalize transition-colors ${view === v ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}>{v}</button>
             ))}
           </div>
-          <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold transition-colors flex items-center gap-1.5 shrink-0"><Add size={16} variant="Linear" color="currentColor"/><span>New Event</span></button>
+          <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-9 sm:h-9 px-4 rounded-full text-sm font-semibold transition-colors flex items-center gap-1.5 shrink-0"><Add size={16} variant="Linear" color="currentColor"/><span className="hidden sm:inline">New Event</span><span className="sm:hidden">+</span></button>
         </div>
       </div>
 
@@ -219,23 +219,26 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Today's Agenda Panel */}
-        <div className={`${agendaOpen ? 'lg:w-72 xl:w-80' : 'lg:w-auto'} shrink-0 bg-white rounded-2xl shadow-[0_2px_12px_rgba(15,23,42,0.04)] p-5 flex flex-col transition-all`}>
-          <div className="flex items-center justify-between mb-4 shrink-0">
+        {/* Today's Agenda Panel - overlay on mobile */}
+        <div className={`${agendaOpen ? 'fixed sm:relative sm:flex inset-0 z-40 sm:z-auto bg-white sm:bg-transparent p-4 sm:p-0' : ''} lg:w-72 xl:w-80 shrink-0 flex flex-col transition-all`}>
+          {agendaOpen && <div className="sm:hidden flex items-center justify-between mb-4"><h3 className="text-base font-semibold text-slate-900">Today's Agenda</h3><button onClick={() => setAgendaOpen(false)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><CloseSquare size={18} variant="Linear" color="currentColor" /></button></div>}
+          {!agendaOpen && (
+            <button onClick={() => setAgendaOpen(true)} className="sm:hidden fixed bottom-6 right-4 z-30 bg-[#16A34A] text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+              <CalendarIcon size={22} variant="Linear" color="currentColor" />
+            </button>
+          )}
+          {agendaOpen && (
+          <div className="sm:bg-white sm:rounded-2xl sm:shadow-[0_2px_12px_rgba(15,23,42,0.04)] p-0 sm:p-5 flex flex-col flex-1 overflow-hidden transition-all">
+          <div className="hidden sm:flex items-center justify-between mb-4 shrink-0">
             <h3 className="text-base font-semibold text-slate-900">Today's Agenda</h3>
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-slate-400">{todayEvents.length}</span>
-              <button onClick={() => setAgendaOpen(!agendaOpen)} className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                {agendaOpen ? (
-                  <ArrowRight size={16} variant="Linear" color="currentColor" />
-                ) : (
-                  <ArrowLeft size={16} variant="Linear" color="currentColor" />
-                )}
+              <button onClick={() => setAgendaOpen(!agendaOpen)} className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors hidden lg:block">
+                {<ArrowRight size={16} variant="Linear" color="currentColor" />}
               </button>
             </div>
           </div>
-          {agendaOpen && (
-            <div className="space-y-3 overflow-y-auto">
+            <div className="space-y-3 overflow-y-auto flex-1">
               {todayEvents.length === 0 ? (
                 <div className="py-10 text-center">
                   <CalendarIcon size={24} variant="Bulk" color="#CBD5E1" className="mx-auto mb-2"/>
@@ -265,6 +268,7 @@ export default function CalendarPage() {
                 ))
               )}
             </div>
+          </div>
           )}
         </div>
       </div>
@@ -273,7 +277,7 @@ export default function CalendarPage() {
       {detailEvent && (
         <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailEvent(null)}>
           <div className="absolute inset-0 bg-black/20"/>
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full sm:max-w-md bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
               <h3 className="font-semibold text-slate-900">Event Details</h3>
               <button onClick={() => setDetailEvent(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"><CloseSquare size={18} variant="Linear" color="currentColor"/></button>

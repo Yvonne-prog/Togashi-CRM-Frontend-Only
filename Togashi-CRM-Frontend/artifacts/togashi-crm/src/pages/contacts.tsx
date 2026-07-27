@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { contacts as mockContacts, contactSummary } from '@/data/dashboardMockData';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { Link } from 'wouter';
 import {
   Add,
@@ -38,6 +39,7 @@ const ACTIVITY_SHORT: Record<string, string> = {
 };
 
 export default function Contacts() {
+  const { hasPermission } = useAuth();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -68,17 +70,19 @@ export default function Contacts() {
   };
 
   return (
-    <div className="space-y-5 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
+    <div className="space-y-4 sm:space-y-5 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Contacts</h2>
           <p className="text-slate-500 mt-1 text-sm">Manage your client and prospect relationships.</p>
         </div>
-        <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0">
-          <Add size={18} variant="Linear" color="currentColor" />
-          <span>Add Contact</span>
-        </button>
+        {hasPermission('contacts.create') && (
+          <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0">
+            <Add size={18} variant="Linear" color="currentColor" />
+            <span>Add Contact</span>
+          </button>
+        )}
       </div>
 
       {/* Summary Cards */}

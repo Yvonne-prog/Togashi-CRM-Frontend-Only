@@ -2,40 +2,42 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { RefreshCircle } from 'iconsax-react';
 import { useToast } from '@/hooks/use-toast';
+import { MOCK_USERS } from '@/lib/mockUsers';
+import { getRolePermissions, ROLES } from '@/lib/roles';
 
-const DEMO_EMAIL = 'admin@togashi.local';
 const DEMO_PASSWORD = 'Admin123!';
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const [email, setEmail] = useState(DEMO_EMAIL);
+  const [email, setEmail] = useState('admin@togashi.local');
   const [password, setPassword] = useState(DEMO_PASSWORD);
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleLogin = (mockUserEmail: string) => {
     setIsSigningIn(true);
 
     window.setTimeout(() => {
-      const normalizedEmail = email.trim().toLowerCase();
+      const normalizedEmail = mockUserEmail.trim().toLowerCase();
+      const user = MOCK_USERS.find((u) => u.email.toLowerCase() === normalizedEmail);
 
-      if (normalizedEmail === DEMO_EMAIL && password === DEMO_PASSWORD) {
+      if (user) {
+        const permissions = getRolePermissions(user.role);
         localStorage.setItem('togashi_crm_authenticated', 'true');
         localStorage.setItem(
           'togashi_crm_user',
           JSON.stringify({
-            id: 'demo-admin-001',
-            name: 'Togashi Administrator',
-            email: DEMO_EMAIL,
-            role: 'Administrator',
+            id: user.id,
+            name: user.fullName,
+            email: user.email,
+            role: user.role,
           }),
         );
 
         toast({
           title: 'Login successful',
-          description: 'Welcome to Togashi CRM.',
+          description: `Welcome, ${user.fullName} (${ROLES[user.role].label}).`,
         });
 
         setLocation('/');
@@ -46,15 +48,20 @@ export default function Login() {
 
       toast({
         title: 'Login failed',
-        description: 'Use the demo email and password shown below.',
+        description: 'Select a valid demo account below.',
         variant: 'destructive',
       });
     }, 500);
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const normalizedEmail = email.trim().toLowerCase();
+    handleLogin(normalizedEmail);
+  };
+
   return (
     <div className="min-h-screen w-full flex bg-[#F3F8F5]">
-      {/* Left side - Branding */}
       <div className="hidden lg:flex flex-1 bg-[#0F172A] flex-col justify-center items-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent" />
@@ -64,13 +71,11 @@ export default function Login() {
             <span className="text-4xl font-bold tracking-tight text-white">TOGASHI</span>
             <span className="text-4xl font-bold tracking-tight text-[#16A34A] ml-2">CRM</span>
           </div>
-
           <p className="text-xl text-slate-300 font-light mb-8">Enterprise operations, refined.</p>
-
           <div className="grid grid-cols-2 gap-4 text-left">
             <div className="bg-[#1E293B] p-4 rounded-xl">
-              <div className="text-[#16A34A] font-bold text-2xl mb-1">98%</div>
-              <div className="text-slate-400 text-sm">Faster pipeline updates</div>
+              <div className="text-[#16A34A] font-bold text-2xl mb-1">9</div>
+              <div className="text-slate-400 text-sm">Role-Based Access</div>
             </div>
             <div className="bg-[#1E293B] p-4 rounded-xl">
               <div className="text-[#16A34A] font-bold text-2xl mb-1">3.2x</div>
@@ -80,7 +85,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right side - Form */}
       <div className="flex-1 flex flex-col justify-center items-center p-8 sm:p-12">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden flex justify-center items-center">
@@ -89,7 +93,7 @@ export default function Login() {
           </div>
 
           <h2 className="text-3xl font-bold text-slate-900 mb-2">Sign in to your account</h2>
-          <p className="text-slate-500 mb-8 text-sm">Welcome back. Please enter your details.</p>
+          <p className="text-slate-500 mb-8 text-sm">Select a demo account below. Password: <span className="font-mono font-semibold text-slate-700">{DEMO_PASSWORD}</span></p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -129,18 +133,43 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-12 bg-emerald-50 rounded-xl p-5">
+          <div className="mt-8">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">Role Testing Accounts</h3>
+            <div className="space-y-2 max-h-[320px] overflow-y-auto">
+              {MOCK_USERS.map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => handleLogin(u.email)}
+                  disabled={isSigningIn}
+                  className="w-full text-left px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors flex items-center gap-3 disabled:opacity-50"
+                >
+                  <div className="h-9 w-9 rounded-full bg-[#1E293B] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                    {u.initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900">{u.fullName}</p>
+                    <p className="text-xs text-slate-500">{u.email} · {ROLES[u.role].label}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6 bg-emerald-50 rounded-xl p-4">
             <h3 className="text-[#15803D] font-semibold mb-2 text-sm">Demo Access</h3>
             <div className="space-y-1 text-sm text-[#15803D]">
-              <div className="flex justify-between gap-4">
-                <span className="opacity-80">Email:</span>
-                <span className="font-mono bg-white/60 px-2 py-0.5 rounded font-bold">{DEMO_EMAIL}</span>
-              </div>
               <div className="flex justify-between gap-4">
                 <span className="opacity-80">Password:</span>
                 <span className="font-mono bg-white/60 px-2 py-0.5 rounded font-bold">{DEMO_PASSWORD}</span>
               </div>
+              <div className="flex justify-between gap-4">
+                <span className="opacity-80">All accounts:</span>
+                <span className="font-mono bg-white/60 px-2 py-0.5 rounded font-bold text-xs">Same password</span>
+              </div>
             </div>
+            <p className="text-xs text-[#15803D] mt-2 opacity-70">
+              Backend authorization must validate every protected action and API request when the backend is connected.
+            </p>
           </div>
         </div>
       </div>

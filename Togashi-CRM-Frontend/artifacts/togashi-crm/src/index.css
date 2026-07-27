@@ -59,45 +59,45 @@
 }
 
 :root {
-  --background: 145 20% 96%; /* #F3F8F5 - light green */
-  --foreground: 222 47% 11%; /* #0F172A */
+  --background: 145 20% 96%;
+  --foreground: 222 47% 11%;
 
-  --card: 0 0% 100%; /* #FFFFFF */
+  --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
-  --card-border: 214 32% 91%; /* #CBD5E1 */
+  --card-border: 214 32% 91%;
 
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
   --popover-border: 214 32% 91%;
 
-  --primary: 142 76% 36%; /* #16A34A */
-  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --primary: 142 76% 36%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 215 32% 17%; /* #1E293B */
+  --secondary: 215 32% 17%;
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 214 32% 91%; /* #CBD5E1 */
-  --muted-foreground: 215 14% 65%; /* #94A3B8 */
+  --muted: 214 32% 91%;
+  --muted-foreground: 215 14% 65%;
 
-  --accent: 214 32% 91%; /* #CBD5E1 */
+  --accent: 214 32% 91%;
   --accent-foreground: 222 47% 11%;
 
-  --destructive: 0 72% 51%; /* #DC2626 */
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --warning: 38 92% 50%; /* #F59E0B */
+  --warning: 38 92% 50%;
   --warning-foreground: 0 0% 100%;
 
-  --success: 142 76% 36%; /* #16A34A */
+  --success: 142 76% 36%;
   --success-foreground: 0 0% 100%;
 
-  --border: 214 32% 91%; /* #CBD5E1 */
+  --border: 214 32% 91%;
   --input: 214 32% 91%;
   --ring: 142 76% 36%;
 
-  --sidebar: 222 47% 11%; /* #0F172A */
+  --sidebar: 222 47% 11%;
   --sidebar-foreground: 0 0% 100%;
-  --sidebar-border: 215 32% 17%; /* #1E293B */
+  --sidebar-border: 215 32% 17%;
   --sidebar-primary: 142 76% 36%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 215 32% 17%;
@@ -115,6 +115,7 @@
   }
   html {
     font-family: 'Poppins', sans-serif;
+    -webkit-text-size-adjust: 100%;
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
@@ -126,4 +127,82 @@
   button, input, textarea, select {
     font-family: 'Poppins', sans-serif;
   }
+
+  /* Touch-friendly minimum target sizes for mobile */
+  @media (max-width: 767px) {
+    button, a, [role="button"] {
+      min-height: 40px;
+    }
+    input, select, textarea {
+      font-size: 16px !important; /* prevent iOS zoom on focus */
+    }
+  }
+}
+
+/* Scrollbar utilities */
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E1 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #CBD5E1;
+    border-radius: 3px;
+  }
+}
+
+/* Responsive page container */
+@layer utilities {
+  .page-container {
+    @apply max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] min-h-[calc(100vh-64px)];
+  }
+  @media (max-width: 639px) {
+    .page-container {
+      margin: -16px;
+      padding: 16px;
+      min-height: calc(100vh - 56px);
+    }
+  }
+  @media (min-width: 640px) and (max-width: 767px) {
+    .page-container {
+      margin: -20px;
+      padding: 20px;
+    }
+  }
+  @media (min-width: 768px) {
+    .page-container {
+      margin: -24px;
+      padding: 24px;
+    }
+  }
+}
+
+/* Responsive form containers */
+@media (max-width: 767px) {
+  .form-container-mobile {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Animate slide-in for detail panels */
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slide-in 0.25s ease-out;
 }

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { quotations as mockQuotations, quotationStats } from '@/data/dashboardMockData';
 import type { Quotation, QuotationStatus, QuotationLineItem } from '@/data/dashboardMockData';
 import {
@@ -69,6 +70,7 @@ function emptyQuotation(): Quotation {
 }
 
 export default function Quotations() {
+  const { hasPermission } = useAuth();
   const [quotations, setQuotations] = useState<Quotation[]>(mockQuotations);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<QuotationStatus | 'All'>('All');
@@ -379,19 +381,19 @@ export default function Quotations() {
   };
 
   return (
-    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
+    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Quotations</h2>
           <p className="text-slate-500 mt-0.5 text-sm">Create, send and track client quotations.</p>
         </div>
-        <button
+        {hasPermission('quotations.create') && (<button
           onClick={() => setFormQuotation(emptyQuotation())}
           className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"
         >
           <Add size={18} variant="Linear" color="currentColor" /><span>New Quotation</span>
-        </button>
+        </button>)}
       </div>
 
       {/* Summary Cards */}
@@ -455,12 +457,12 @@ export default function Quotations() {
           </div>
           <h3 className="text-base font-medium text-slate-900">No quotations yet</h3>
           <p className="text-xs text-slate-500 mt-1 mb-4">Create your first quotation to send a formal price offer to a client.</p>
-          <button
+          {hasPermission('quotations.create') && (<button
             onClick={() => setFormQuotation(emptyQuotation())}
             className="inline-flex items-center gap-2 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold transition-colors"
           >
             <Add size={16} variant="Linear" color="currentColor" /><span>New Quotation</span>
-          </button>
+          </button>)}
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(15,23,42,0.04)] overflow-hidden">
@@ -545,7 +547,7 @@ export default function Quotations() {
       {detailQuotation && (
         <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailQuotation(null)}>
           <div className="absolute inset-0 bg-black/20" />
-          <div className="relative w-full max-w-lg bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full sm:max-w-lg bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
               <button onClick={() => setDetailQuotation(null)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
                 <ArrowLeft size={18} variant="Linear" color="currentColor" />
@@ -637,7 +639,7 @@ export default function Quotations() {
       {formQuotation && (
         <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setFormQuotation(null)}>
           <div className="absolute inset-0 bg-black/20" />
-          <div className="relative w-full max-w-xl bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full sm:max-w-xl bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
               <button onClick={() => setFormQuotation(null)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
                 <ArrowLeft size={18} variant="Linear" color="currentColor" />

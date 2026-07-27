@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { companies as mockCompanies, companySummary } from '@/data/dashboardMockData';
 import { Link } from 'wouter';
 import {
@@ -23,6 +24,7 @@ const formatUgx = (val: number) =>
   val === 0 ? '—' : 'UGX ' + new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(val);
 
 export default function Companies() {
+  const { hasPermission } = useAuth();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -42,10 +44,10 @@ export default function Companies() {
   const st = Math.min(page * perPage, filtered.length);
 
   return (
-    <div className="space-y-5 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
+    <div className="space-y-5 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div><h2 className="text-2xl font-semibold tracking-tight text-slate-950">Companies</h2><p className="text-slate-500 mt-1 text-sm">Manage accounts and organizations.</p></div>
-        <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor"/><span>Add Company</span></button>
+        {hasPermission('companies.create') && (<button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor"/><span>Add Company</span></button>)}
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -128,7 +130,7 @@ export default function Companies() {
             </div>
           </div>
         </>) : (
-          <div className="px-6 py-16 text-center"><div className="mb-4 mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50"><Buildings size={24} variant="Bulk" color="#CBD5E1"/></div><h3 className="text-base font-medium text-slate-900">No companies found</h3><p className="text-xs text-slate-500 mt-1">{(search || statusFilter) ? 'Try adjusting your search or filters.' : 'Get started by adding your first company.'}</p>{(search || statusFilter) ? <button onClick={() => { setSearch(''); setStatusFilter(''); setPage(1); }} className="mt-3 text-sm font-medium text-[#16A34A]">Clear all filters</button> : <button className="mt-3 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold inline-flex items-center gap-1.5"><Add size={16} variant="Linear" color="currentColor"/><span>Add Company</span></button>}</div>
+          <div className="px-6 py-16 text-center"><div className="mb-4 mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50"><Buildings size={24} variant="Bulk" color="#CBD5E1"/></div><h3 className="text-base font-medium text-slate-900">No companies found</h3><p className="text-xs text-slate-500 mt-1">{(search || statusFilter) ? 'Try adjusting your search or filters.' : 'Get started by adding your first company.'}</p>{(search || statusFilter) ? <button onClick={() => { setSearch(''); setStatusFilter(''); setPage(1); }} className="mt-3 text-sm font-medium text-[#16A34A]">Clear all filters</button> : (hasPermission('companies.create') && <button className="mt-3 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold inline-flex items-center gap-1.5"><Add size={16} variant="Linear" color="currentColor"/><span>Add Company</span></button>)}</div>
         )}
       </div>
     </div>

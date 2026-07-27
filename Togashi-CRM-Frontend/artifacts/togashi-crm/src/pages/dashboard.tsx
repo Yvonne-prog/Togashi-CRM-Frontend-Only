@@ -104,7 +104,7 @@ export default function Dashboard() {
   const visibleTasks = tasks.slice(0, 3);
 
   return (
-    <div className="space-y-7 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
+    <div className="space-y-5 sm:space-y-7 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>

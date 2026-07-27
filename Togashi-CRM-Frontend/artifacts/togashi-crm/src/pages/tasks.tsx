@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { taskList, taskStats } from '@/data/dashboardMockData';
 import type { Task } from '@/data/dashboardMockData';
 import { Link } from 'wouter';
@@ -8,6 +9,7 @@ const PRIORITY_STYLES: Record<string, string> = { High: 'bg-amber-50 text-amber-
 const STATUS_STYLES: Record<string, string> = { 'Not Started': 'bg-slate-100 text-slate-600', 'In Progress': 'bg-blue-50 text-blue-700', Review: 'bg-purple-50 text-purple-700', Completed: 'bg-emerald-50 text-emerald-700', Blocked: 'bg-red-50 text-red-700', Overdue: 'bg-red-50 text-red-700' };
 
 export default function Tasks() {
+  const { hasPermission } = useAuth();
   const [tab, setTab] = useState<'my' | 'assigned' | 'completed' | 'overdue'>('my');
   const [search, setSearch] = useState(''); const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
   const [projectFilter, setProjectFilter] = useState<string | null>(null);
@@ -32,10 +34,10 @@ export default function Tasks() {
   const TABS: { key: typeof tab; label: string }[] = [{ key: 'my', label: 'My Tasks' }, { key: 'assigned', label: 'Assigned' }, { key: 'completed', label: 'Completed' }, { key: 'overdue', label: 'Overdue' }];
 
   return (
-    <div className="space-y-5 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
+    <div className="space-y-5 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div><h2 className="text-2xl font-semibold tracking-tight text-slate-950">Tasks</h2><p className="text-slate-500 mt-1 text-sm">Track and manage your workflow.</p></div>
-        <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor"/><span>Add Task</span></button>
+        {hasPermission('tasks.create') && (<button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor"/><span>Add Task</span></button>)}
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

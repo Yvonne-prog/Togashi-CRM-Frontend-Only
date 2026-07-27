@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { receipts as mockReceipts } from '@/data/dashboardMockData';
 import type { Receipt, ReceiptStatus, ReceiptPaymentMethod } from '@/data/dashboardMockData';
 import {
@@ -103,6 +104,7 @@ function emptyReceipt(): Receipt {
 }
 
 export default function Receipts() {
+  const { hasPermission } = useAuth();
   const [receipts, setReceipts] = useState<Receipt[]>(mockReceipts);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ReceiptStatus | 'All'>('All');
@@ -146,8 +148,6 @@ export default function Receipts() {
       oldest: (a, b) => new Date(a.issueDate + ', 2026').getTime() - new Date(b.issueDate + ', 2026').getTime(),
       'highest-amount': (a, b) => b.amount - a.amount,
       'lowest-amount': (a, b) => a.amount - b.amount,
-      'payment-date': (a, b) => new Date(b.paymentDate + ', 2026').getTime() - new Date(a.paymentDate + ', 2026').getTime(),
-      status: (a, b) => a.status.localeCompare(b.status),
     };
     return result.sort(fns[sortBy] || fns.newest);
   }, [receipts, search, statusFilter, sortBy]);
@@ -204,11 +204,11 @@ ${rcp.clientNote ? `<div class="trms"><div class="ts"><h3>Note</h3><p>${rcp.clie
   function closePreview() { setPreviewReceipt(null); setPreviewLoading(false); }
 
   return (
-    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
+    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div><h2 className="text-2xl font-semibold tracking-tight text-slate-950">Receipts</h2><p className="text-slate-500 mt-0.5 text-sm">Record and manage client payment receipts.</p></div>
-        <button onClick={() => setFormReceipt(emptyReceipt())} className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor" /><span>New Receipt</span></button>
+        {hasPermission('receipts.create') && (<button onClick={() => setFormReceipt(emptyReceipt())} className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor" /><span>New Receipt</span></button>)}
       </div>
 
       {/* Summary Cards */}
@@ -233,7 +233,7 @@ ${rcp.clientNote ? `<div class="trms"><div class="ts"><h3>Note</h3><p>${rcp.clie
           <div className="relative"><select value={statusFilter} onChange={e => setStatusFilter(e.target.value as ReceiptStatus | 'All')} className="appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer outline-none"><option value="All">All</option><option value="Issued">Issued</option><option value="Voided">Voided</option></select><ArrowDown2 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} variant="Linear" color="currentColor" /></div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative"><select value={sortBy} onChange={e => setSortBy(e.target.value)} className="appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer outline-none"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="highest-amount">Highest Amount</option><option value="lowest-amount">Lowest Amount</option><option value="payment-date">Payment Date</option><option value="status">Status</option></select><ArrowDown2 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} variant="Linear" color="currentColor" /></div>
+          <div className="relative"><select value={sortBy} onChange={e => setSortBy(e.target.value)} className="appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer outline-none"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="highest-amount">Highest Amount</option><option value="lowest-amount">Lowest Amount</option></select><ArrowDown2 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} variant="Linear" color="currentColor" /></div>
           <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"><Sort size={14} variant="Linear" color="currentColor" />Sort</button>
         </div>
       </div>
@@ -243,7 +243,7 @@ ${rcp.clientNote ? `<div class="trms"><div class="ts"><h3>Note</h3><p>${rcp.clie
         <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(15,23,42,0.04)] py-16 text-center">
           <div className="mb-4 mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50"><DocumentText size={24} variant="Bulk" color="#CBD5E1" /></div>
           <h3 className="text-base font-medium text-slate-900">No receipts yet</h3><p className="text-xs text-slate-500 mt-1 mb-4">Create your first receipt to confirm a client payment.</p>
-          <button onClick={() => setFormReceipt(emptyReceipt())} className="inline-flex items-center gap-2 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold transition-colors"><Add size={16} variant="Linear" color="currentColor" /><span>New Receipt</span></button>
+          {hasPermission('receipts.create') && (<button onClick={() => setFormReceipt(emptyReceipt())} className="inline-flex items-center gap-2 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold transition-colors"><Add size={16} variant="Linear" color="currentColor" /><span>New Receipt</span></button>)}
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(15,23,42,0.04)] overflow-hidden">
@@ -288,7 +288,7 @@ ${rcp.clientNote ? `<div class="trms"><div class="ts"><h3>Note</h3><p>${rcp.clie
 
       {/* Detail Drawer */}
       {detailReceipt && (
-        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailReceipt(null)}><div className="absolute inset-0 bg-black/20" /><div className="relative w-full max-w-lg bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailReceipt(null)}><div className="absolute inset-0 bg-black/20" /><div className="relative w-full sm:max-w-lg bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10"><button onClick={() => setDetailReceipt(null)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"><ArrowLeft size={18} variant="Linear" color="currentColor" /></button><span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_STYLES[detailReceipt.status]}`}>{detailReceipt.status}</span></div>
           <div className="px-6 py-5">
             <div className="flex items-center gap-3 mb-4"><div className="h-10 w-10 rounded-lg bg-[#1E293B] text-white flex items-center justify-center text-sm font-semibold shrink-0">{detailReceipt.initials}</div><div><h2 className="text-lg font-semibold text-slate-900">{detailReceipt.number}</h2><p className="text-sm text-slate-500">{detailReceipt.companyName}</p></div></div>
@@ -316,7 +316,7 @@ ${rcp.clientNote ? `<div class="trms"><div class="ts"><h3>Note</h3><p>${rcp.clie
 
       {/* New Receipt Form */}
       {formReceipt && (
-        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setFormReceipt(null)}><div className="absolute inset-0 bg-black/20" /><div className="relative w-full max-w-xl bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setFormReceipt(null)}><div className="absolute inset-0 bg-black/20" /><div className="relative w-full sm:max-w-xl bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10"><button onClick={() => setFormReceipt(null)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"><ArrowLeft size={18} variant="Linear" color="currentColor" /></button><h3 className="text-base font-semibold text-slate-900">{formReceipt.id ? 'Edit Receipt' : 'New Receipt'}</h3><div className="w-8" /></div>
           <div className="px-6 py-5 space-y-6">
             <section><p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Receipt Information</p>
@@ -354,7 +354,7 @@ ${rcp.clientNote ? `<div class="trms"><div class="ts"><h3>Note</h3><p>${rcp.clie
 
       {/* Void Confirmation */}
       {voidConfirm && (
-        <div className="fixed inset-0 z-[55] flex items-center justify-center" onClick={() => setVoidConfirm(null)}><div className="absolute inset-0 bg-black/30" /><div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[55] flex items-center justify-center" onClick={() => setVoidConfirm(null)}><div className="absolute inset-0 bg-black/30" /><div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full sm:max-w-md mx-4" onClick={e => e.stopPropagation()}>
           <h3 className="text-base font-semibold text-slate-900 mb-2">Void Receipt</h3><p className="text-sm text-slate-500 mb-1">This action will mark the receipt as voided. The receipt record will be kept for historical reference.</p>
           <div className="mt-3"><label className="block text-xs font-medium text-slate-500 mb-1">Reason for Voiding</label><textarea value={voidConfirm.reason} onChange={e => setVoidConfirm({ ...voidConfirm, reason: e.target.value })} rows={3} placeholder="Explain why this receipt is being voided..." className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none" /></div>
           <div className="flex gap-3 mt-5"><button onClick={() => setVoidConfirm(null)} className="flex-1 px-4 py-2.5 border border-slate-200 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button><button onClick={handleVoid} disabled={!voidConfirm.reason.trim()} className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-full text-sm font-semibold transition-colors">Void Receipt</button></div>

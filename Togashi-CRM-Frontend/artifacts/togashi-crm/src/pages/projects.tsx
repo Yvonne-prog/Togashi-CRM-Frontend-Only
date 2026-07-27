@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { projects as mockProjects, projectStats } from '@/data/dashboardMockData';
 import type { Project } from '@/data/dashboardMockData';
 import { Link } from 'wouter';
@@ -32,6 +33,7 @@ function daysRemaining(dueDate: string): string {
 }
 
 export default function Projects() {
+  const { hasPermission } = useAuth();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [view, setView] = useState<'cards' | 'table'>('cards');
@@ -44,7 +46,7 @@ export default function Projects() {
   });
 
   return (
-    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
+    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div><h2 className="text-2xl font-semibold tracking-tight text-slate-950">Projects</h2><p className="text-slate-500 mt-0.5 text-sm">Manage deliverables and track implementation progress.</p></div>
@@ -53,7 +55,7 @@ export default function Projects() {
             <button onClick={() => setView('cards')} className={`p-1.5 rounded-md transition-colors ${view === 'cards' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}><Grid1 size={16} variant="Linear" color="currentColor"/></button>
             <button onClick={() => setView('table')} className={`p-1.5 rounded-md transition-colors ${view === 'table' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}><SliderHorizontal size={16} variant="Linear" color="currentColor"/></button>
           </div>
-          <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor"/><span>New Project</span></button>
+          {hasPermission('projects.create') && (<button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor"/><span>New Project</span></button>)}
         </div>
       </div>
 
@@ -176,7 +178,7 @@ export default function Projects() {
       {detailProject && (
         <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailProject(null)}>
           <div className="absolute inset-0 bg-black/20"/>
-          <div className="relative w-full max-w-lg bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full sm:max-w-lg bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
               <button onClick={() => setDetailProject(null)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"><ArrowLeft size={18} variant="Linear" color="currentColor"/></button>
               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ${STATUS_STYLES[detailProject.status].bg} ${STATUS_STYLES[detailProject.status].text}`}><div className={`w-1 h-1 rounded-full ${STATUS_STYLES[detailProject.status].dot}`}/>{detailProject.status}</span>

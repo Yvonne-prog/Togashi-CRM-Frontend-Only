@@ -43,7 +43,7 @@ export default function Documents() {
   const recent = recentDocuments.map(id => mockDocs.find(d => d.id === id)).filter(Boolean) as Document[];
 
   return (
-    <div className="space-y-2 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]" onDragOver={e => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={e => { e.preventDefault(); setDragOver(false); }} onClick={() => setMenuDocId(null)}>
+    <div className="space-y-2 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]" onDragOver={e => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={e => { e.preventDefault(); setDragOver(false); }} onClick={() => setMenuDocId(null)}>
       {dragOver && (<div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16A34A]/10 border-4 border-dashed border-[#16A34A] pointer-events-none"><div className="text-center"><DocumentDownload size={48} variant="Bulk" color="#16A34A" className="mx-auto mb-3"/><p className="text-lg font-semibold text-[#16A34A]">Drop files to upload</p></div></div>)}
 
       {/* Header */}
@@ -168,7 +168,7 @@ export default function Documents() {
 
       {/* Detail Drawer */}
       {detailDoc && (() => { const ti = TYPE_ICONS[detailDoc.type] || TYPE_ICONS.pdf; return (
-        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailDoc(null)}><div className="absolute inset-0 bg-black/20"/><div className="relative w-full max-w-md bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailDoc(null)}><div className="absolute inset-0 bg-black/20"/><div className="relative w-full sm:max-w-md bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10"><h3 className="font-semibold text-slate-900">File Details</h3><button onClick={() => setDetailDoc(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"><CloseSquare size={18} variant="Linear" color="currentColor"/></button></div>
           <div className="px-6 py-5">
             <div className="flex items-center gap-3 mb-4"><div className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: ti.color + '15' }}><ti.icon size={24} variant="Linear" color={ti.color}/></div><div className="min-w-0"><h2 className="text-base font-semibold text-slate-900 truncate">{detailDoc.name}</h2><p className="text-xs text-slate-500 mt-0.5">{ti.label} · {formatSize(detailDoc.size)} · v1.0</p></div></div>

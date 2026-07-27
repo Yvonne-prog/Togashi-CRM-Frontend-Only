@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { leads as mockLeads, leadStats } from '@/data/dashboardMockData';
 import { Link } from 'wouter';
 import {
@@ -37,6 +38,7 @@ const SOURCE_ICONS: Record<string, React.ComponentType<any>> = {
 const SCORE_COLOR = (s: number) => s >= 70 ? '#16A34A' : s >= 40 ? '#F59E0B' : '#F97316';
 
 export default function Leads() {
+  const { hasPermission } = useAuth();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [stageFilter, setStageFilter] = useState<string>('');
@@ -58,16 +60,16 @@ export default function Leads() {
   const closeActionMenu = () => setActionMenuId(null);
 
   return (
-    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]" onClick={() => { if (actionMenuId) setActionMenuId(null); }}>
+    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]" onClick={() => { if (actionMenuId) setActionMenuId(null); }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Leads</h2>
           <p className="text-slate-500 mt-0.5 text-sm">Qualify and nurture new prospects.</p>
         </div>
-        <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0">
+        {hasPermission('leads.create') && (<button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0">
           <Add size={18} variant="Linear" color="currentColor" /><span>Add Lead</span>
-        </button>
+        </button>)}
       </div>
 
       {/* KPI Cards */}
@@ -231,7 +233,7 @@ export default function Leads() {
             <div className="mb-4 mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50"><Profile2User size={24} variant="Bulk" color="#CBD5E1"/></div>
             <h3 className="text-base font-medium text-slate-900">No leads found</h3>
             <p className="text-xs text-slate-500 mt-1">{(search || stageFilter) ? 'Try adjusting your search or filters.' : 'Get started by adding your first lead.'}</p>
-            {(search || stageFilter) ? <button onClick={() => { setSearch(''); setStageFilter(''); setPage(1); }} className="mt-3 text-sm font-medium text-[#16A34A]">Clear all filters</button> : <button className="mt-3 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold inline-flex items-center gap-1.5"><Add size={16} variant="Linear" color="currentColor"/><span>Add Lead</span></button>}
+            {(search || stageFilter) ? <button onClick={() => { setSearch(''); setStageFilter(''); setPage(1); }} className="mt-3 text-sm font-medium text-[#16A34A]">Clear all filters</button> : (hasPermission('leads.create') && <button className="mt-3 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold inline-flex items-center gap-1.5"><Add size={16} variant="Linear" color="currentColor"/><span>Add Lead</span></button>)}
           </div>
         )}
       </div>

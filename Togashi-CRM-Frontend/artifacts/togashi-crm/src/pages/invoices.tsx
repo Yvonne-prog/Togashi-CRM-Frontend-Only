@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { invoices as mockInvoices } from '@/data/dashboardMockData';
 import type { Invoice, InvoiceStatus, InvoiceLineItem, PaymentMethod, InvoicePayment } from '@/data/dashboardMockData';
 import {
@@ -85,6 +86,7 @@ function emptyInvoice(): Invoice {
 }
 
 export default function Invoices() {
+  const { hasPermission } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'All'>('All');
@@ -135,7 +137,6 @@ export default function Invoices() {
       'highest-total': (a, b) => b.total - a.total,
       'lowest-total': (a, b) => a.total - b.total,
       'highest-balance': (a, b) => b.balance - a.balance,
-      status: (a, b) => a.status.localeCompare(b.status),
     };
     return result.sort(sortFns[sortBy] || sortFns.newest);
   }, [invoices, search, statusFilter, sortBy]);
@@ -259,7 +260,7 @@ ${inv.relatedQuotationNumber ? `<div class="ref"><h3>Reference</h3><p>Quotation:
     ];
     if (inv.status === 'Draft' || inv.status === 'Sent') items.splice(1, 0, { label: 'Edit', icon: Edit, action: () => { setFormInvoice(inv); setMoreOpen(null); } });
     if (inv.status === 'Draft') { items.push({ label: 'Mark as Sent', icon: Send, action: () => handleStatusChange(inv.id, 'Sent') }); items.push({ label: 'Delete', icon: Trash, action: () => { setDeleteConfirm(inv.id); setMoreOpen(null); }, danger: true }); }
-    if (inv.status === 'Sent' || inv.status === 'Partially Paid' || inv.status === 'Overdue') items.push({ label: 'Record Payment', icon: WalletAdd, action: () => { setPaymentForm({ inv, amount: String(inv.balance), method: 'Bank Transfer', reference: '', notes: '' }); setMoreOpen(null); } });
+    if ((inv.status === 'Sent' || inv.status === 'Partially Paid' || inv.status === 'Overdue') && hasPermission('invoices.record_payment')) items.push({ label: 'Record Payment', icon: WalletAdd, action: () => { setPaymentForm({ inv, amount: String(inv.balance), method: 'Bank Transfer', reference: '', notes: '' }); setMoreOpen(null); } });
     if (inv.status === 'Sent' || inv.status === 'Partially Paid' || inv.status === 'Overdue') items.push({ label: 'Send Reminder', icon: Sms, action: () => { setReminderForm({ inv, message: `Dear ${inv.contactName},\n\nThis is a reminder that Invoice ${inv.number} for ${formatCurrency(inv.total, inv.currency)} is due on ${inv.dueDate}. The outstanding balance is ${formatCurrency(inv.balance, inv.currency)}.\n\nPlease arrange payment at your earliest convenience.\n\nThank you,\nTogashi Technologies` }); setMoreOpen(null); } });
     if (inv.status === 'Paid' || inv.status === 'Partially Paid') items.push({ label: 'Payment History', icon: Money, action: () => { setDetailInvoice(inv); setMoreOpen(null); } });
     if (inv.status === 'Sent' || inv.status === 'Partially Paid' || inv.status === 'Overdue') items.push({ label: 'Cancel', icon: CloseCircle, action: () => handleStatusChange(inv.id, 'Cancelled') });
@@ -267,11 +268,11 @@ ${inv.relatedQuotationNumber ? `<div class="ref"><h3>Reference</h3><p>Quotation:
   }
 
   return (
-    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-5 md:-m-6 p-5 md:p-6 min-h-[calc(100vh-64px)]">
+    <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div><h2 className="text-2xl font-semibold tracking-tight text-slate-950">Invoices</h2><p className="text-slate-500 mt-0.5 text-sm">Create invoices and track client payments.</p></div>
-        <button onClick={() => setFormInvoice(emptyInvoice())} className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor" /><span>New Invoice</span></button>
+        {hasPermission('invoices.create') && (<button onClick={() => setFormInvoice(emptyInvoice())} className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"><Add size={18} variant="Linear" color="currentColor" /><span>New Invoice</span></button>)}
       </div>
 
       {/* Summary Cards */}
@@ -296,7 +297,7 @@ ${inv.relatedQuotationNumber ? `<div class="ref"><h3>Reference</h3><p>Quotation:
           <div className="relative"><select value={statusFilter} onChange={e => setStatusFilter(e.target.value as InvoiceStatus | 'All')} className="appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer outline-none"><option value="All">All</option><option value="Draft">Draft</option><option value="Sent">Sent</option><option value="Partially Paid">Partially Paid</option><option value="Paid">Paid</option><option value="Overdue">Overdue</option><option value="Cancelled">Cancelled</option></select><ArrowDown2 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} variant="Linear" color="currentColor" /></div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative"><select value={sortBy} onChange={e => setSortBy(e.target.value)} className="appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer outline-none"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="due-date">Due Date</option><option value="highest-total">Highest Total</option><option value="lowest-total">Lowest Total</option><option value="highest-balance">Highest Balance</option><option value="status">Status</option></select><ArrowDown2 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} variant="Linear" color="currentColor" /></div>
+          <div className="relative"><select value={sortBy} onChange={e => setSortBy(e.target.value)} className="appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer outline-none"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="due-date">Due Date</option><option value="highest-total">Highest Total</option><option value="lowest-total">Lowest Total</option><option value="highest-balance">Highest Balance</option></select><ArrowDown2 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} variant="Linear" color="currentColor" /></div>
           <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"><Sort size={14} variant="Linear" color="currentColor" />Sort</button>
         </div>
       </div>
@@ -306,7 +307,7 @@ ${inv.relatedQuotationNumber ? `<div class="ref"><h3>Reference</h3><p>Quotation:
         <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(15,23,42,0.04)] py-16 text-center">
           <div className="mb-4 mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50"><DocumentText size={24} variant="Bulk" color="#CBD5E1" /></div>
           <h3 className="text-base font-medium text-slate-900">No invoices yet</h3><p className="text-xs text-slate-500 mt-1 mb-4">Create your first invoice to request payment from a client.</p>
-          <button onClick={() => setFormInvoice(emptyInvoice())} className="inline-flex items-center gap-2 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold transition-colors"><Add size={16} variant="Linear" color="currentColor" /><span>New Invoice</span></button>
+          {hasPermission('invoices.create') && (<button onClick={() => setFormInvoice(emptyInvoice())} className="inline-flex items-center gap-2 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold transition-colors"><Add size={16} variant="Linear" color="currentColor" /><span>New Invoice</span></button>)}
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(15,23,42,0.04)] overflow-hidden">
@@ -350,7 +351,7 @@ ${inv.relatedQuotationNumber ? `<div class="ref"><h3>Reference</h3><p>Quotation:
 
       {/* Detail Drawer */}
       {detailInvoice && (() => { const st = computeStatus(detailInvoice); return (
-        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailInvoice(null)}><div className="absolute inset-0 bg-black/20" /><div className="relative w-full max-w-lg bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailInvoice(null)}><div className="absolute inset-0 bg-black/20" /><div className="relative w-full sm:max-w-lg bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10"><button onClick={() => setDetailInvoice(null)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"><ArrowLeft size={18} variant="Linear" color="currentColor" /></button><span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_STYLES[st]}`}>{st}</span></div>
           <div className="px-6 py-5">
             <div className="flex items-center gap-3 mb-4"><div className="h-10 w-10 rounded-lg bg-[#1E293B] text-white flex items-center justify-center text-sm font-semibold shrink-0">{detailInvoice.initials}</div><div><h2 className="text-lg font-semibold text-slate-900">{detailInvoice.number}</h2><p className="text-sm text-slate-500">{detailInvoice.companyName}</p></div></div>
@@ -378,7 +379,7 @@ ${inv.relatedQuotationNumber ? `<div class="ref"><h3>Reference</h3><p>Quotation:
 
       {/* New/Edit Invoice Form */}
       {formInvoice && (
-        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setFormInvoice(null)}><div className="absolute inset-0 bg-black/20" /><div className="relative w-full max-w-xl bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setFormInvoice(null)}><div className="absolute inset-0 bg-black/20" /><div className="relative w-full sm:max-w-xl bg-white h-full shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10"><button onClick={() => setFormInvoice(null)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"><ArrowLeft size={18} variant="Linear" color="currentColor" /></button><h3 className="text-base font-semibold text-slate-900">{formInvoice.id ? 'Edit Invoice' : 'New Invoice'}</h3><div className="w-8" /></div>
           <div className="px-6 py-5 space-y-6">
             <section><p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Invoice Information</p>
@@ -436,7 +437,7 @@ ${inv.relatedQuotationNumber ? `<div class="ref"><h3>Reference</h3><p>Quotation:
 
       {/* Record Payment Modal */}
       {paymentForm && (
-        <div className="fixed inset-0 z-[55] flex items-center justify-center" onClick={() => setPaymentForm(null)}><div className="absolute inset-0 bg-black/30" /><div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[55] flex items-center justify-center" onClick={() => setPaymentForm(null)}><div className="absolute inset-0 bg-black/30" /><div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full sm:max-w-md mx-4" onClick={e => e.stopPropagation()}>
           <h3 className="text-base font-semibold text-slate-900 mb-1">Record Payment</h3><p className="text-xs text-slate-500 mb-4">{paymentForm.inv.number} · Balance: {formatCurrency(paymentForm.inv.balance, paymentForm.inv.currency)}</p>
           <div className="space-y-3">
             <div><label className="block text-xs font-medium text-slate-500 mb-1">Amount Received</label><input type="number" value={paymentForm.amount} onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })} min="1" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
@@ -450,7 +451,7 @@ ${inv.relatedQuotationNumber ? `<div class="ref"><h3>Reference</h3><p>Quotation:
 
       {/* Send Reminder Modal */}
       {reminderForm && (
-        <div className="fixed inset-0 z-[55] flex items-center justify-center" onClick={() => setReminderForm(null)}><div className="absolute inset-0 bg-black/30" /><div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[55] flex items-center justify-center" onClick={() => setReminderForm(null)}><div className="absolute inset-0 bg-black/30" /><div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full sm:max-w-md mx-4" onClick={e => e.stopPropagation()}>
           <h3 className="text-base font-semibold text-slate-900 mb-1">Send Reminder</h3><p className="text-xs text-slate-500 mb-4">{reminderForm.inv.number} · Due: {reminderForm.inv.dueDate}</p>
           <div><label className="block text-xs font-medium text-slate-500 mb-1">Message</label><textarea value={reminderForm.message} onChange={e => setReminderForm({ ...reminderForm, message: e.target.value })} rows={6} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none" /></div>
           <div className="flex gap-3 mt-5"><button onClick={() => setReminderForm(null)} className="flex-1 px-4 py-2.5 border border-slate-200 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button><button onClick={() => { setReminderForm(null); }} className="flex-1 px-4 py-2.5 bg-[#16A34A] hover:bg-[#15803D] text-white rounded-full text-sm font-semibold transition-colors">Send Reminder</button></div>

@@ -5,27 +5,27 @@ export default function Settings() {
   const { data: users } = useListUsers();
 
   return (
-    <div className="flex h-[calc(100vh-64px)] -m-6 bg-white">
+    <div className="flex h-[calc(100vh-64px)] -m-4 sm:-m-5 md:-m-6 bg-white">
       {/* Settings Left Nav */}
-      <div className="w-64 border-r border-slate-200 bg-slate-50/50 p-6 flex flex-col gap-1">
-        <h2 className="text-xl font-bold text-slate-900 mb-6">Settings</h2>
+      <div className="w-56 lg:w-64 border-r border-slate-200 bg-slate-50/50 p-4 lg:p-6 flex flex-col gap-1 shrink-0">
+        <h2 className="text-lg lg:text-xl font-bold text-slate-900 mb-4 lg:mb-6">Settings</h2>
         
-        <button className="text-left px-4 py-2.5 rounded-lg font-medium bg-[#E2E8F0] text-[#0F172A]">
+        <button className="text-left px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg font-medium bg-[#E2E8F0] text-[#0F172A] text-sm">
           Users & Roles
         </button>
-        <button className="text-left px-4 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100">
+        <button className="text-left px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 text-sm">
           Organization Profile
         </button>
-        <button className="text-left px-4 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100">
+        <button className="text-left px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 text-sm">
           Departments
         </button>
-        <button className="text-left px-4 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100">
+        <button className="text-left px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 text-sm">
           Security & Audit
         </button>
       </div>
 
       {/* Settings Content Area */}
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl">
           <div className="flex justify-between items-center mb-6">
             <div>

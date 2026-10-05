@@ -1,102 +1,94 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
-import { RefreshCircle } from 'iconsax-react';
+import { Link, useLocation } from 'wouter';
+import { RefreshCircle, Eye, EyeSlash } from 'iconsax-react';
 import { useToast } from '@/hooks/use-toast';
-import { MOCK_USERS } from '@/lib/mockUsers';
-import { getRolePermissions, ROLES } from '@/lib/roles';
 
-const DEMO_PASSWORD = 'Admin123!';
+import { supabase } from '@/lib/supabase';
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const [email, setEmail] = useState('admin@togashi.local');
-  const [password, setPassword] = useState(DEMO_PASSWORD);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (mockUserEmail: string) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isSigningIn) return;
+
+    setError('');
     setIsSigningIn(true);
 
-    window.setTimeout(() => {
-      const normalizedEmail = mockUserEmail.trim().toLowerCase();
-      const user = MOCK_USERS.find((u) => u.email.toLowerCase() === normalizedEmail);
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (user) {
-        const permissions = getRolePermissions(user.role);
-        localStorage.setItem('togashi_crm_authenticated', 'true');
-        localStorage.setItem(
-          'togashi_crm_user',
-          JSON.stringify({
-            id: user.id,
-            name: user.fullName,
-            email: user.email,
-            role: user.role,
-          }),
-        );
-
-        toast({
-          title: 'Login successful',
-          description: `Welcome, ${user.fullName} (${ROLES[user.role].label}).`,
-        });
-
-        setLocation('/');
-        return;
-      }
-
-      setIsSigningIn(false);
+      if (signInError) throw signInError;
 
       toast({
-        title: 'Login failed',
-        description: 'Select a valid demo account below.',
-        variant: 'destructive',
+        title: 'Welcome back',
+        description: 'Signed in successfully',
       });
-    }, 500);
-  };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const normalizedEmail = email.trim().toLowerCase();
-    handleLogin(normalizedEmail);
+      setLocation('/', { replace: true });
+    } catch (err: unknown) {
+      setIsSigningIn(false);
+      const message = err instanceof Error ? err.message : 'Sign in failed';
+
+      const friendly =
+        message.includes('Invalid login credentials')
+          ? 'Incorrect email or password.'
+          : message.includes('too-many-requests') || message.includes('rate')
+          ? 'Too many attempts. Please try again later.'
+          : 'Sign in failed. Please check your connection.';
+
+      setError(friendly);
+    }
   };
 
   return (
     <div className="min-h-screen w-full flex bg-[#F3F8F5]">
-      <div className="hidden lg:flex flex-1 bg-[#0F172A] flex-col justify-center items-center p-12 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent" />
+      <div className="hidden lg:flex lg:w-1/2 bg-[#0F172A] flex-col justify-center items-center p-12 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.07] bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/70 to-transparent" />
 
-        <div className="relative z-10 max-w-md text-center">
-          <div className="flex justify-center items-center mb-8">
-            <span className="text-4xl font-bold tracking-tight text-white">TOGASHI</span>
-            <span className="text-4xl font-bold tracking-tight text-[#16A34A] ml-2">CRM</span>
-          </div>
-          <p className="text-xl text-slate-300 font-light mb-8">Enterprise operations, refined.</p>
-          <div className="grid grid-cols-2 gap-4 text-left">
-            <div className="bg-[#1E293B] p-4 rounded-xl">
-              <div className="text-[#16A34A] font-bold text-2xl mb-1">9</div>
-              <div className="text-slate-400 text-sm">Role-Based Access</div>
-            </div>
-            <div className="bg-[#1E293B] p-4 rounded-xl">
-              <div className="text-[#16A34A] font-bold text-2xl mb-1">3.2x</div>
-              <div className="text-slate-400 text-sm">Revenue visibility</div>
-            </div>
-          </div>
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <img
+            src="/images/togashi-logo.JPEG"
+            alt="Togashi"
+            className="h-[172px] w-auto object-contain mb-7 rounded-[4px]"
+          />
+          <p className="text-[38px] font-bold text-white tracking-tight leading-none mb-3.5">Togashi CRM</p>
+          <p className="text-[19px] font-medium text-slate-300/80 max-w-[420px] leading-relaxed">Technology Built for Business Growth.</p>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center items-center p-8 sm:p-12">
-        <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden flex justify-center items-center">
-            <span className="text-3xl font-bold tracking-tight text-[#0F172A]">TOGASHI</span>
-            <span className="text-3xl font-bold tracking-tight text-[#16A34A] ml-2">CRM</span>
+      <div className="flex-1 lg:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12">
+        <div className="w-full max-w-[460px]">
+          <div className="mb-10 lg:hidden text-center">
+            <img
+              src="/images/togashi-logo.JPEG"
+              alt="Togashi"
+              className="h-20 w-auto object-contain mx-auto mb-5 rounded-[4px]"
+            />
+            <p className="text-[32px] font-bold text-slate-900 tracking-tight mb-1">Togashi CRM</p>
+            <p className="text-base text-slate-500 font-medium">Technology Built for Business Growth.</p>
           </div>
 
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">Sign in to your account</h2>
-          <p className="text-slate-500 mb-8 text-sm">Select a demo account below. Password: <span className="font-mono font-semibold text-slate-700">{DEMO_PASSWORD}</span></p>
+          <h2 className="text-[28px] font-bold text-slate-900 mb-1.5">Sign in to your account</h2>
+          <p className="text-slate-500 mb-8 text-sm">Enter your credentials to continue.</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
+          {error && (
+            <div className="mb-5 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
               <label htmlFor="email" className="text-sm font-medium text-slate-700 block">Email</label>
               <input
                 id="email" type="email" required autoComplete="email"
@@ -106,21 +98,41 @@ export default function Login() {
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label htmlFor="password" className="text-sm font-medium text-slate-700 block">Password</label>
-                <button type="button"
-                  onClick={() => toast({ title: 'Demo mode', description: 'Password recovery will be connected when the backend is added.' })}
-                  className="text-sm text-[#16A34A] hover:text-[#15803D] font-medium transition-colors">
-                  Forgot password?
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="text-sm font-medium text-slate-700 block">Password</label>
+              <div className="relative">
+                <input
+                  id="password" type={showPassword ? 'text' : 'password'} required autoComplete="current-password"
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 pr-12 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeSlash size={18} variant="Linear" color="currentColor" /> : <Eye size={18} variant="Linear" color="currentColor" />}
                 </button>
               </div>
-              <input
-                id="password" type="password" required autoComplete="current-password"
-                value={password} onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                placeholder="Enter your password"
-              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-[#16A34A] focus:ring-[#16A34A]/20"
+                />
+                <span className="text-sm text-slate-600">Remember me</span>
+              </label>
+              <button type="button"
+                onClick={() => toast({ title: 'Forgot password', description: 'Use your Supabase project dashboard to reset your password.' })}
+                className="text-sm text-[#16A34A] hover:text-[#15803D] font-medium transition-colors">
+                Forgot password?
+              </button>
             </div>
 
             <button type="submit" disabled={isSigningIn}
@@ -133,44 +145,12 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-8">
-            <h3 className="text-sm font-semibold text-slate-700 mb-3">Role Testing Accounts</h3>
-            <div className="space-y-2 max-h-[320px] overflow-y-auto">
-              {MOCK_USERS.map((u) => (
-                <button
-                  key={u.id}
-                  onClick={() => handleLogin(u.email)}
-                  disabled={isSigningIn}
-                  className="w-full text-left px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors flex items-center gap-3 disabled:opacity-50"
-                >
-                  <div className="h-9 w-9 rounded-full bg-[#1E293B] text-white flex items-center justify-center text-xs font-bold shrink-0">
-                    {u.initials}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900">{u.fullName}</p>
-                    <p className="text-xs text-slate-500">{u.email} · {ROLES[u.role].label}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-6 bg-emerald-50 rounded-xl p-4">
-            <h3 className="text-[#15803D] font-semibold mb-2 text-sm">Demo Access</h3>
-            <div className="space-y-1 text-sm text-[#15803D]">
-              <div className="flex justify-between gap-4">
-                <span className="opacity-80">Password:</span>
-                <span className="font-mono bg-white/60 px-2 py-0.5 rounded font-bold">{DEMO_PASSWORD}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="opacity-80">All accounts:</span>
-                <span className="font-mono bg-white/60 px-2 py-0.5 rounded font-bold text-xs">Same password</span>
-              </div>
-            </div>
-            <p className="text-xs text-[#15803D] mt-2 opacity-70">
-              Backend authorization must validate every protected action and API request when the backend is connected.
-            </p>
-          </div>
+          <p className="mt-6 text-center text-sm text-slate-500">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="text-[#16A34A] hover:text-[#15803D] font-semibold transition-colors">
+              Create account
+            </Link>
+          </p>
         </div>
       </div>
     </div>

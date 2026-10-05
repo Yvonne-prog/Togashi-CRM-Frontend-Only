@@ -1,11 +1,22 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { leads as mockLeads, leadStats } from '@/data/dashboardMockData';
 import { Link } from 'wouter';
 import {
   Add, SearchNormal1, TrendUp, DirectUp, Profile2User, Flashy,
-  ArrowLeft, ArrowRight, Sort, More, Global, Call, Briefcase, ProfileAdd, ArrowDown2,
+  ArrowLeft, ArrowRight, More, Global, Call, Briefcase, ProfileAdd, ArrowDown2,
+  RefreshCircle, CloseCircle,
 } from 'iconsax-react';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  useLeads,
+  useLeadStats,
+  useCreateLead,
+  useUpdateLead,
+  useDeleteLead,
+  type LeadItem,
+} from '@/hooks/useLeads';
+import { LeadFormModal } from '@/pages/leads/LeadFormModal';
 
 const STAGE_STYLES: Record<string, string> = {
   'New': 'bg-blue-50 text-blue-700',
@@ -37,8 +48,15 @@ const SOURCE_ICONS: Record<string, React.ComponentType<any>> = {
 
 const SCORE_COLOR = (s: number) => s >= 70 ? '#16A34A' : s >= 40 ? '#F59E0B' : '#F97316';
 
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase();
+}
+
 export default function Leads() {
   const { hasPermission } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [stageFilter, setStageFilter] = useState<string>('');
@@ -47,17 +65,80 @@ export default function Leads() {
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
   const perPage = 12;
 
-  const filtered = mockLeads.filter(l => {
-    const q = search.toLowerCase();
-    return (!q || `${l.firstName} ${l.lastName}`.toLowerCase().includes(q) || l.company.toLowerCase().includes(q) || l.email.toLowerCase().includes(q)) && (!stageFilter || l.status === stageFilter);
+  const { data, isLoading, isError, error } = useLeads({
+    limit: perPage,
+    page,
+    search: search || undefined,
+    status: stageFilter || undefined,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
   });
 
-  const totalPages = Math.ceil(filtered.length / perPage);
-  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
-  const sf = filtered.length === 0 ? 0 : (page - 1) * perPage + 1;
-  const st = Math.min(page * perPage, filtered.length);
+  const { data: stats, isLoading: statsLoading } = useLeadStats();
+  const createLead = useCreateLead();
+  const updateLead = useUpdateLead();
+  const deleteLead = useDeleteLead();
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingLead, setEditingLead] = useState<LeadItem | null>(null);
+  const [deletingLead, setDeletingLead] = useState<LeadItem | null>(null);
+
+  const items = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+
+  const statusCount = (s: string) => stats?.byStatus.find(x => x.status === s)?.count ?? 0;
+  const tempCount = (t: string) => stats?.byTemperature.find(x => x.temperature === t)?.count ?? 0;
+  const totalLeads = stats?.total ?? 0;
+  const qualified = statusCount('Qualified');
+  const hot = tempCount('Hot');
+  const newLeads = statusCount('New');
+  const qualificationRate = totalLeads > 0 ? Math.round((qualified / totalLeads) * 100) : 0;
 
   const closeActionMenu = () => setActionMenuId(null);
+
+  const handleCreate = (formData: Partial<LeadItem>) => {
+    createLead.mutate(formData, {
+      onSuccess: () => {
+        setShowCreate(false);
+        queryClient.invalidateQueries({ queryKey: ['leads', 'stats'] });
+        toast({ title: 'Lead created', description: 'The lead has been added successfully.' });
+      },
+      onError: (err) => {
+        toast({ title: 'Failed to create lead', description: err.message, variant: 'destructive' });
+      },
+    });
+  };
+
+  const handleUpdate = (formData: Partial<LeadItem>) => {
+    if (!editingLead) return;
+    updateLead.mutate({ id: editingLead.id, data: formData }, {
+      onSuccess: () => {
+        setEditingLead(null);
+        queryClient.invalidateQueries({ queryKey: ['lead', editingLead.id] });
+        queryClient.invalidateQueries({ queryKey: ['leads', 'stats'] });
+        toast({ title: 'Lead updated', description: 'Changes saved successfully.' });
+      },
+      onError: (err) => {
+        toast({ title: 'Failed to update lead', description: err.message, variant: 'destructive' });
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    if (!deletingLead) return;
+    deleteLead.mutate(deletingLead.id, {
+      onSuccess: () => {
+        setDeletingLead(null);
+        queryClient.invalidateQueries({ queryKey: ['lead', deletingLead.id] });
+        queryClient.invalidateQueries({ queryKey: ['leads', 'stats'] });
+        toast({ title: 'Lead deleted', description: 'The lead has been archived.' });
+      },
+      onError: (err) => {
+        toast({ title: 'Failed to delete lead', description: err.message, variant: 'destructive' });
+      },
+    });
+  };
 
   return (
     <div className="space-y-4 max-w-[1600px] mx-auto pb-12 bg-[#F7F7F5] -m-4 sm:-m-5 md:-m-6 p-4 sm:p-5 md:p-6 min-h-[calc(100vh-64px)]" onClick={() => { if (actionMenuId) setActionMenuId(null); }}>
@@ -67,7 +148,7 @@ export default function Leads() {
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Leads</h2>
           <p className="text-slate-500 mt-0.5 text-sm">Qualify and nurture new prospects.</p>
         </div>
-        {hasPermission('leads.create') && (<button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0">
+        {hasPermission('leads.create') && (<button onClick={() => setShowCreate(true)} className="bg-[#16A34A] hover:bg-[#15803D] text-white h-10 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 shrink-0">
           <Add size={18} variant="Linear" color="currentColor" /><span>Add Lead</span>
         </button>)}
       </div>
@@ -75,10 +156,10 @@ export default function Leads() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { l: 'Total Leads', i: Profile2User, v: leadStats.total, s: `+${leadStats.totalChange}% from last month` },
-          { l: 'Qualified Leads', i: DirectUp, v: leadStats.qualified, s: `${leadStats.qualificationRate}% qualification rate` },
-          { l: 'High Priority Leads', i: TrendUp, v: leadStats.hot, s: leadStats.hotSubtext },
-          { l: 'New This Week', i: Flashy, v: leadStats.newThisWeek, s: `+${leadStats.newChange} from last week` },
+          { l: 'Total Leads', i: Profile2User, v: statsLoading ? '—' : totalLeads, s: 'across all stages' },
+          { l: 'Qualified Leads', i: DirectUp, v: statsLoading ? '—' : qualified, s: `${qualificationRate}% qualification rate` },
+          { l: 'High Priority Leads', i: TrendUp, v: statsLoading ? '—' : hot, s: 'Awaiting immediate follow-up' },
+          { l: 'New Leads', i: Flashy, v: statsLoading ? '—' : newLeads, s: 'leads in the New stage' },
         ].map(({ l, i: Icon, v, s }) => (
           <div key={l} className="bg-white rounded-xl p-3 shadow-[0_2px_8px_rgba(15,23,42,0.03)]">
             <div className="flex items-center gap-1.5 mb-0.5">
@@ -122,27 +203,42 @@ export default function Leads() {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-              <Sort size={13} variant="Linear" color="currentColor" />Sort
-            </button>
             <div className="relative">
               <button onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); }} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
                 <More size={13} variant="Linear" color="currentColor" />More
               </button>
               {moreOpen && (
                 <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-30" onMouseLeave={() => setMoreOpen(false)}>
-                  <button className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Import</button>
-                  <button className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Export</button>
-                  <button className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Column Visibility</button>
-                  <div className="border-t border-slate-100 my-1" />
-                  <button className="w-full text-left px-4 py-2 text-xs text-slate-400 cursor-not-allowed">Bulk Actions</button>
+                  <button onClick={(e) => { e.stopPropagation(); setMoreOpen(false); setShowCreate(true); }} className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Add Lead</button>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {paginated.length > 0 ? (<>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="px-6 py-20 text-center">
+            <RefreshCircle className="mx-auto animate-spin text-[#16A34A] mb-4" size={28} variant="Linear" color="currentColor" />
+            <p className="text-sm text-slate-500">Loading leads...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {isError && !isLoading && (
+          <div className="px-6 py-16 text-center">
+            <div className="mb-4 mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+              <CloseCircle size={24} variant="Bulk" color="#DC2626" />
+            </div>
+            <h3 className="text-base font-medium text-slate-900">Failed to load leads</h3>
+            <p className="text-xs text-slate-500 mt-1">{error instanceof Error ? error.message : 'Could not connect to the server.'}</p>
+            <button onClick={() => window.location.reload()} className="mt-3 text-sm font-medium text-[#16A34A] hover:text-[#15803D] transition-colors">
+              Try again
+            </button>
+          </div>
+        )}
+
+        {!isLoading && !isError && items.length > 0 ? (<>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -156,33 +252,33 @@ export default function Leads() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {paginated.map(l => {
-                  const priority = TEMP_TO_PRIORITY[l.temperature] || 'Medium';
+                {items.map(l => {
+                  const priority = TEMP_TO_PRIORITY[l.temperature ?? ''] || 'Medium';
                   const pStyle = PRIORITY_STYLES[priority];
-                  const SourceIcon = SOURCE_ICONS[l.source] || Global;
+                  const SourceIcon = SOURCE_ICONS[l.source ?? ''] || Global;
                   return (
                     <tr key={l.id} className="hover:bg-slate-50/60 transition-colors group">
                       <td className="px-4 py-3">
                         <Link href={`/leads/${l.id}`} className="flex items-center gap-2.5">
-                          <div className="h-8 w-8 rounded-full bg-[#1E293B] text-white flex items-center justify-center text-[11px] font-semibold shrink-0">{l.initials}</div>
+                          <div className="h-8 w-8 rounded-full bg-[#1E293B] text-white flex items-center justify-center text-[11px] font-semibold shrink-0">{initialsFromName(l.name)}</div>
                           <div className="min-w-0">
-                            <p className="text-[14px] font-medium text-slate-900 group-hover:text-[#16A34A] transition-colors truncate">{l.firstName} {l.lastName}</p>
-                            <p className="text-[12px] text-slate-400 truncate">{l.company}</p>
+                            <p className="text-[14px] font-medium text-slate-900 group-hover:text-[#16A34A] transition-colors truncate">{l.name}</p>
+                            <p className="text-[12px] text-slate-400 truncate">{l.company ?? '—'}</p>
                           </div>
                         </Link>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
                           <SourceIcon size={13} variant="Linear" color="#94A3B8" />
-                          <span className="text-[12px] text-slate-600">{l.source}</span>
+                          <span className="text-[12px] text-slate-600">{l.source ?? '—'}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="w-12 h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full transition-all" style={{ width: `${l.score}%`, backgroundColor: SCORE_COLOR(l.score) }} />
+                            <div className="h-full rounded-full transition-all" style={{ width: `${l.score ?? 0}%`, backgroundColor: SCORE_COLOR(l.score ?? 0) }} />
                           </div>
-                          <span className="text-xs font-semibold text-slate-700">{l.score}</span>
+                          <span className="text-xs font-semibold text-slate-700">{l.score ?? 0}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -203,13 +299,9 @@ export default function Leads() {
                         {actionMenuId === l.id && (
                           <div className="absolute right-2 top-full mt-0.5 w-44 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-40" onClick={e => e.stopPropagation()}>
                             <Link href={`/leads/${l.id}`} className="block w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50" onClick={closeActionMenu}>View Lead</Link>
-                            <button className="block w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Edit Lead</button>
-                            <button className="block w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Convert to Contact</button>
-                            <button className="block w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Create Deal</button>
-                            <button className="block w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Schedule Meeting</button>
-                            <button className="block w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Send Email</button>
+                            <button onClick={() => { closeActionMenu(); setEditingLead(l); }} className="block w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50">Edit Lead</button>
                             <div className="border-t border-slate-100 my-1" />
-                            <button className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50">Delete</button>
+                            <button onClick={() => { closeActionMenu(); setDeletingLead(l); }} className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50">Delete</button>
                           </div>
                         )}
                       </td>
@@ -220,8 +312,9 @@ export default function Leads() {
             </table>
           </div>
 
+          {/* Pagination */}
           <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between">
-            <div className="text-xs text-slate-500">{sf}–{st} of {filtered.length}</div>
+            <div className="text-xs text-slate-500">{total === 0 ? 0 : (page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}</div>
             <div className="flex gap-1">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"><ArrowLeft size={13} variant="Linear" color="currentColor"/></button>
               <div className="flex items-center gap-0.5">{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (<button key={p} onClick={() => setPage(p)} className={`w-7 h-7 rounded-md text-xs font-medium transition-colors ${p === page ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{p}</button>))}</div>
@@ -229,14 +322,53 @@ export default function Leads() {
             </div>
           </div>
         </>) : (
-          <div className="px-6 py-16 text-center">
-            <div className="mb-4 mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50"><Profile2User size={24} variant="Bulk" color="#CBD5E1"/></div>
-            <h3 className="text-base font-medium text-slate-900">No leads found</h3>
-            <p className="text-xs text-slate-500 mt-1">{(search || stageFilter) ? 'Try adjusting your search or filters.' : 'Get started by adding your first lead.'}</p>
-            {(search || stageFilter) ? <button onClick={() => { setSearch(''); setStageFilter(''); setPage(1); }} className="mt-3 text-sm font-medium text-[#16A34A]">Clear all filters</button> : (hasPermission('leads.create') && <button className="mt-3 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold inline-flex items-center gap-1.5"><Add size={16} variant="Linear" color="currentColor"/><span>Add Lead</span></button>)}
-          </div>
+          !isLoading && !isError && (
+            <div className="px-6 py-16 text-center">
+              <div className="mb-4 mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-50"><Profile2User size={24} variant="Bulk" color="#CBD5E1"/></div>
+              <h3 className="text-base font-medium text-slate-900">No leads found</h3>
+              <p className="text-xs text-slate-500 mt-1">{(search || stageFilter) ? 'Try adjusting your search or filters.' : 'Get started by adding your first lead.'}</p>
+              {(search || stageFilter) ? <button onClick={() => { setSearch(''); setStageFilter(''); setPage(1); }} className="mt-3 text-sm font-medium text-[#16A34A]">Clear all filters</button> : (hasPermission('leads.create') && <button onClick={() => setShowCreate(true)} className="mt-3 bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-sm font-semibold inline-flex items-center gap-1.5"><Add size={16} variant="Linear" color="currentColor"/><span>Add Lead</span></button>)}
+            </div>
+          )
         )}
       </div>
+
+      {/* Create Modal */}
+      <LeadFormModal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onSubmit={handleCreate}
+        title="Add Lead"
+        isSubmitting={createLead.isPending}
+      />
+
+      {/* Edit Modal */}
+      <LeadFormModal
+        open={!!editingLead}
+        onClose={() => setEditingLead(null)}
+        onSubmit={handleUpdate}
+        initial={editingLead ?? undefined}
+        title="Edit Lead"
+        isSubmitting={updateLead.isPending}
+      />
+
+      {/* Delete Confirmation */}
+      {!!deletingLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setDeletingLead(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Lead</h3>
+            <p className="text-sm text-slate-600 mb-5">
+              Are you sure you want to delete <strong>{deletingLead.name}</strong>? This action will archive the lead.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeletingLead(null)} className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
+              <button onClick={handleDelete} disabled={deleteLead.isPending} className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                {deleteLead.isPending ? <><RefreshCircle className="animate-spin" size={16} /><span>Deleting...</span></> : <span>Delete</span>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

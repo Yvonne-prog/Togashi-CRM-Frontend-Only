@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { receipts as mockReceipts } from '@/data/dashboardMockData';
 import type { Receipt, ReceiptStatus, ReceiptPaymentMethod } from '@/data/dashboardMockData';
 import {
-  Add, SearchNormal1, Sort, More, ArrowLeft, ArrowDown2, DocumentText,
+  Add, SearchNormal1, More, ArrowLeft, ArrowDown2, DocumentText,
   Eye, Copy, Trash, Printer, Calendar,
   CloseCircle, Money, WalletAdd,
 } from 'iconsax-react';
@@ -234,7 +234,7 @@ ${rcp.clientNote ? `<div class="trms"><div class="ts"><h3>Note</h3><p>${rcp.clie
         </div>
         <div className="flex items-center gap-2">
           <div className="relative"><select value={sortBy} onChange={e => setSortBy(e.target.value)} className="appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer outline-none"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="highest-amount">Highest Amount</option><option value="lowest-amount">Lowest Amount</option></select><ArrowDown2 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} variant="Linear" color="currentColor" /></div>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"><Sort size={14} variant="Linear" color="currentColor" />Sort</button>
+
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import type { Project } from '@/data/dashboardMockData';
 import { Link } from 'wouter';
 import {
   Add, SearchNormal1, Briefcase, Calendar, TickCircle, StatusUp,
-  ClipboardTick, Grid1, SliderHorizontal, Sort, ArrowLeft, Timer,
+  ClipboardTick, Grid1, SliderHorizontal, ArrowLeft, Timer,
 } from 'iconsax-react';
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
@@ -87,7 +87,6 @@ export default function Projects() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"><Sort size={14} variant="Linear" color="currentColor"/>Sort</button>
         </div>
       </div>
 

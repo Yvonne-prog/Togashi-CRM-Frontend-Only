@@ -50,9 +50,14 @@ export function Shell({ children }: { children: ReactNode }) {
             >
               <HambergerMenu size={22} variant="Linear" color="currentColor" />
             </button>
-            <h1 className="font-semibold text-slate-900 text-lg truncate">
-              TOGASHI<span className="text-[#16A34A]">CRM</span>
-            </h1>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <img
+                src="/images/togashi-logo.JPEG"
+                alt="Togashi"
+                className="h-7 w-auto object-contain shrink-0"
+              />
+              <span className="text-[#16A34A] font-bold text-xs tracking-widest shrink-0">CRM</span>
+            </div>
           </header>
         )}
         {!isMobile && isDashboard && <Topbar />}

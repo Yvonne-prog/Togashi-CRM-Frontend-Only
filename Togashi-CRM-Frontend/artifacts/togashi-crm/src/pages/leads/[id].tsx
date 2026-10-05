@@ -1,18 +1,85 @@
+import { useState } from 'react';
 import { useGetLead } from '@workspace/api-client-react';
-import { useParams, Link } from 'wouter';
-import { ArrowLeft, Profile2User, Buildings, Sms, Call, Calendar, Flag, Refresh, DollarCircle } from 'iconsax-react';
+import { useParams, Link, useLocation } from 'wouter';
+import { ArrowLeft, Profile2User, Buildings, Sms, Call, Calendar, Flag, Refresh, DollarCircle, Trash, RefreshCircle } from 'iconsax-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { useUpdateLead, useDeleteLead, useConvertLead, type LeadItem } from '@/hooks/useLeads';
+import { LeadFormModal } from '@/pages/leads/LeadFormModal';
 
 export default function LeadDetail() {
   const params = useParams();
   const id = params.id as string;
-  
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: lead, isLoading } = useGetLead(id, {
     query: {
       enabled: !!id,
       queryKey: ['lead', id],
     }
   });
+
+  const updateLead = useUpdateLead();
+  const deleteLead = useDeleteLead();
+  const convertLead = useConvertLead();
+
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+
+  const handleUpdate = (formData: Partial<LeadItem>) => {
+    if (!lead || !lead.id) return;
+    updateLead.mutate({ id: lead.id, data: formData }, {
+      onSuccess: () => {
+        setShowEdit(false);
+        queryClient.invalidateQueries({ queryKey: ['lead', lead.id] });
+        queryClient.invalidateQueries({ queryKey: ['leads', 'stats'] });
+        toast({ title: 'Lead updated', description: 'Changes saved successfully.' });
+      },
+      onError: (err) => {
+        toast({ title: 'Failed to update lead', description: err.message, variant: 'destructive' });
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    if (!lead || !lead.id) return;
+    deleteLead.mutate(lead.id, {
+      onSuccess: () => {
+        setShowDelete(false);
+        queryClient.invalidateQueries({ queryKey: ['lead', lead.id] });
+        queryClient.invalidateQueries({ queryKey: ['leads'] });
+        toast({ title: 'Lead deleted', description: 'The lead has been archived.' });
+        navigate('/leads');
+      },
+      onError: (err) => {
+        toast({ title: 'Failed to delete lead', description: err.message, variant: 'destructive' });
+      },
+    });
+  };
+
+  const handleConvert = () => {
+    if (!lead || !lead.id) return;
+    convertLead.mutate(
+      { id: lead.id, data: { createContact: true, createCompany: !!lead.company, createDeal: true } },
+      {
+        onSuccess: (result) => {
+          queryClient.invalidateQueries({ queryKey: ['lead', lead.id] });
+          queryClient.invalidateQueries({ queryKey: ['leads'] });
+          if (result.contactId || result.companyId || result.dealId) {
+            toast({ title: 'Lead converted', description: 'The lead has been converted successfully.' });
+          } else {
+            toast({ title: 'Lead conversion submitted', description: 'The conversion request was processed.' });
+          }
+        },
+        onError: (err) => {
+          toast({ title: 'Failed to convert lead', description: err.message, variant: 'destructive' });
+        },
+      }
+    );
+  };
 
   if (isLoading) return <div className="p-8 text-center text-slate-500">Loading lead...</div>;
   if (!lead) return <div className="p-8 text-center text-slate-500">Lead not found.</div>;
@@ -42,14 +109,20 @@ export default function LeadDetail() {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <button className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex justify-center items-center gap-2">
+          <button onClick={() => setShowEdit(true)} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex justify-center items-center gap-2">
             Edit
           </button>
-          <button className="bg-[#16A34A] hover:bg-[#15803D] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors flex justify-center items-center gap-2">
-            <Refresh size={18} variant="Linear" color="currentColor" />
+          <button onClick={handleConvert} disabled={convertLead.isPending} className="bg-[#16A34A] hover:bg-[#15803D] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors flex justify-center items-center gap-2 disabled:opacity-60">
+            {convertLead.isPending ? <RefreshCircle className="animate-spin" size={18} variant="Linear" color="currentColor" /> : <Refresh size={18} variant="Linear" color="currentColor" />}
             Convert Lead
           </button>
         </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 text-sm text-slate-500">
+        <button onClick={() => setShowDelete(true)} className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
+          <Trash size={16} variant="Linear" color="currentColor" /> Delete Lead
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -144,6 +217,34 @@ export default function LeadDetail() {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <LeadFormModal
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        onSubmit={handleUpdate}
+        initial={lead}
+        title="Edit Lead"
+        isSubmitting={updateLead.isPending}
+      />
+
+      {/* Delete Confirmation */}
+      {showDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowDelete(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Lead</h3>
+            <p className="text-sm text-slate-600 mb-5">
+              Are you sure you want to delete <strong>{lead.name}</strong>? This action will archive the lead.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowDelete(false)} className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
+              <button onClick={handleDelete} disabled={deleteLead.isPending} className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                {deleteLead.isPending ? <><RefreshCircle className="animate-spin" size={16} /><span>Deleting...</span></> : <span>Delete</span>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

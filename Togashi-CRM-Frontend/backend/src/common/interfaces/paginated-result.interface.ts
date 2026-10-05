@@ -1,0 +1,6 @@
+export interface PaginatedResult<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  limit: number;
+}

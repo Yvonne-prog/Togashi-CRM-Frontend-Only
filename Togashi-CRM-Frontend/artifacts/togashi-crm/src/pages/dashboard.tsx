@@ -4,12 +4,11 @@ import {
   kpiMetrics,
   pipelineStages,
   scheduleEvents,
-  healthSegments,
-  healthClients,
+  revenueByService,
   upcomingTasks as mockTasks,
   recentActivities,
   topDeals,
-  teamMembers,
+  teamWorkloads,
   revenueData,
   revenueSummary,
 } from '@/data/dashboardMockData';
@@ -93,12 +92,7 @@ export default function Dashboard() {
     );
   };
 
-  const HEALTH_COLORS = ['#16A34A', '#F59E0B', '#DC2626'];
-  const healthData = healthSegments.map((s, i) => ({
-    name: s.name,
-    value: s.value,
-    color: HEALTH_COLORS[i],
-  }));
+  const totalRevenueByService = revenueByService.reduce((sum, item) => sum + item.value, 0);
 
   const sortedDeals = [...topDeals].sort((a, b) => b.value - a.value);
   const visibleTasks = tasks.slice(0, 3);
@@ -349,100 +343,126 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Row 3: Team Performance | Customer Health */}
+      {/* Row 3: Team Workload | Customer Health */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Team Performance */}
+        {/* Team Workload */}
         <div className="lg:col-span-2 bg-white rounded-[28px] overflow-hidden shadow-[0_8px_30px_rgba(15,23,42,0.035)]">
-          <div className="px-7 py-5 flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-slate-900">Team Performance</h3>
-            <Link href="/settings" className="text-[#16A34A] hover:text-[#15803D] text-sm font-medium flex items-center gap-1">
-              View team <ArrowRight size={14} variant="Linear" color="currentColor" />
-            </Link>
+          <div className="px-7 py-5">
+            <h3 className="text-xl font-semibold text-slate-900">Team Workload</h3>
+            <p className="text-sm text-slate-500 mt-0.5">Current assignments for this week</p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-slate-400">
-                <tr>
-                  <th className="px-7 py-3 text-xs font-semibold uppercase tracking-wider">Member</th>
-                  <th className="px-7 py-3 text-xs font-semibold uppercase tracking-wider">Deals Won</th>
-                  <th className="px-7 py-3 text-xs font-semibold uppercase tracking-wider">Revenue</th>
-                  <th className="px-7 py-3 text-xs font-semibold uppercase tracking-wider">Tasks</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100/80">
-                {teamMembers.map((member) => (
-                  <tr key={member.userId} className="hover:bg-slate-50/40 transition-colors">
-                    <td className="px-7 py-3.5 flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-[#1E293B] text-white flex items-center justify-center text-xs font-semibold">
-                        {member.initials}
+          <div className="divide-y divide-slate-100">
+            {teamWorkloads.map((member) => (
+              <div key={member.userId} className="px-7 py-4 hover:bg-slate-50/40 transition-colors">
+                <div className="flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-full bg-[#1E293B] text-white flex items-center justify-center text-xs font-semibold shrink-0 mt-0.5">
+                    {member.initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
+                      <div>
+                        <p className="font-medium text-slate-900 text-sm">{member.name}</p>
+                        <p className="text-xs text-slate-500">{member.role}</p>
                       </div>
-                      <span className="font-medium text-slate-900">{member.name}</span>
-                    </td>
-                    <td className="px-7 py-3.5">{member.dealsWon}</td>
-                    <td className="px-7 py-3.5 font-medium text-slate-900">{formatUgx(member.revenue)}</td>
-                    <td className="px-7 py-3.5 text-slate-500">{member.tasksCompleted}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Customer Health */}
-        <div className="bg-white rounded-[28px] p-6 shadow-[0_8px_30px_rgba(15,23,42,0.035)]">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-xl font-semibold text-slate-900">Customer Health</h3>
-            <Link href="/reports" className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors">
-              <ArrowRight size={14} variant="Linear" color="currentColor" />
-            </Link>
-          </div>
-          <div className="flex items-center gap-5 mb-4">
-            <div className="w-24 h-24 shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={healthData}
-                    innerRadius={28}
-                    outerRadius={44}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {healthData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex-1 space-y-2.5">
-              {healthSegments.map((item, i) => (
-                <div key={item.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: HEALTH_COLORS[i] }}></div>
-                    <span className="text-sm text-slate-500">{item.name}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm font-semibold text-slate-900">{item.value}</span>
-                    <span className="text-xs text-slate-400 ml-1">{item.percentage}%</span>
+                      <span className={`self-start sm:self-auto px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                        member.status === 'On Track' ? 'bg-emerald-50 text-emerald-700' :
+                        member.status === 'In Progress' ? 'bg-blue-50 text-blue-700' :
+                        member.status === 'Waiting for Client' ? 'bg-amber-50 text-amber-700' :
+                        member.status === 'Review' ? 'bg-purple-50 text-purple-700' :
+                        member.status === 'Blocked' ? 'bg-red-50 text-red-600' :
+                        'bg-slate-100 text-slate-600'
+                      }`}>
+                        {member.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">
+                      <span className="text-slate-400">Working on: </span>
+                      {member.project}
+                    </p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="flex items-center gap-2 flex-1">
+                        <div className="flex-1 max-w-[120px] bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${member.progress}%`,
+                              backgroundColor: member.progress >= 75 ? '#16A34A' : member.progress >= 50 ? '#3B82F6' : member.progress >= 25 ? '#F59E0B' : '#F97316',
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-xs font-medium text-slate-600">{member.progress}%</span>
+                      </div>
+                      {member.secondary && (
+                        <span className="text-[10px] text-slate-400">{member.secondary}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-          <div className="border-t border-slate-100 pt-4 space-y-2">
-            {healthClients.map((client) => (
-              <div key={client.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{
-                    backgroundColor: client.status === 'Healthy' ? '#16A34A' :
-                      client.status === 'Needs Attention' ? '#F59E0B' : '#DC2626'
-                  }}></div>
-                  <span className="text-sm text-slate-700">{client.name}</span>
-                </div>
-                <span className="text-xs text-slate-400">{client.lastActivity}</span>
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Revenue by Service */}
+        <div className="bg-white rounded-[28px] p-6 shadow-[0_8px_30px_rgba(15,23,42,0.035)]">
+          <h3 className="text-xl font-semibold text-slate-900 mb-1">Revenue by Service</h3>
+          <p className="text-xs text-slate-500 mb-4">Distribution of confirmed revenue across Togashi's core services.</p>
+
+          {revenueByService.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <p className="text-sm font-medium text-slate-700">No revenue data available</p>
+              <p className="text-xs text-slate-400 mt-1 max-w-[200px]">Confirmed revenue will appear here after payments are recorded.</p>
+            </div>
+          ) : (
+            <>
+              <div className="relative w-44 h-44 mx-auto">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={revenueByService}
+                      innerRadius={52}
+                      outerRadius={80}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {revenueByService.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+                      formatter={(value: number, name: string) => {
+                        const pct = totalRevenueByService > 0 ? Math.round((value / totalRevenueByService) * 100) : 0;
+                        return [formatUgx(value), `${pct}% of total revenue`];
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <p className="text-[10px] text-slate-400 font-medium leading-tight">Total Revenue</p>
+                  <p className="text-sm font-semibold text-slate-900 leading-tight">{formatUgxCompact(totalRevenueByService)}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 mt-5">
+                {revenueByService.map((item) => {
+                  const pct = totalRevenueByService > 0 ? Math.round((item.value / totalRevenueByService) * 100) : 0;
+                  return (
+                    <div key={item.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }}></div>
+                        <span className="text-sm text-slate-600 truncate">{item.name}</span>
+                      </div>
+                      <div className="text-right shrink-0 ml-2">
+                        <span className="text-sm font-semibold text-slate-900">{pct}%</span>
+                        <span className="text-xs text-slate-400 ml-1">{formatUgxCompact(item.value)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
 

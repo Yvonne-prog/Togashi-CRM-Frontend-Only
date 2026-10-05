@@ -85,7 +85,7 @@ export default function Documents() {
         <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border border-slate-200 bg-white rounded-lg text-xs px-3 py-2 text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
           <option value="modified">Sort ▼</option><option value="name">Name</option><option value="size">Size</option><option value="type">Type</option>
         </select>
-        <button className="bg-[#16A34A] hover:bg-[#15803D] text-white h-9 px-4 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0"><Add size={15} variant="Linear" color="currentColor"/>Upload</button>
+
       </div>
 
       {/* Table + Recently Opened */}

@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { taskList, taskStats } from '@/data/dashboardMockData';
 import type { Task } from '@/data/dashboardMockData';
 import { Link } from 'wouter';
-import { TickCircle, Timer, Warning2, SearchNormal1, Sort, More, Add, StatusUp, MessageText, Edit2 } from 'iconsax-react';
+import { TickCircle, Timer, Warning2, SearchNormal1, Add, StatusUp, MessageText, Edit2 } from 'iconsax-react';
 
 const PRIORITY_STYLES: Record<string, string> = { High: 'bg-amber-50 text-amber-700', Medium: 'bg-blue-50 text-blue-700', Low: 'bg-slate-100 text-slate-500' };
 const STATUS_STYLES: Record<string, string> = { 'Not Started': 'bg-slate-100 text-slate-600', 'In Progress': 'bg-blue-50 text-blue-700', Review: 'bg-purple-50 text-purple-700', Completed: 'bg-emerald-50 text-emerald-700', Blocked: 'bg-red-50 text-red-700', Overdue: 'bg-red-50 text-red-700' };
@@ -57,7 +57,7 @@ export default function Tasks() {
           </div>
           <div className="flex items-center gap-2">
             <select value={projectFilter || ''} onChange={e => setProjectFilter(e.target.value || null)} className="border border-slate-200 bg-slate-50 rounded-lg text-xs px-3 py-2 text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"><option value="">All Projects</option>{projects.map(p => <option key={p} value={p}>{p}</option>)}</select>
-            <div className="relative"><button onClick={() => setMoreOpen(!moreOpen)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50"><Sort size={14} variant="Linear" color="currentColor"/>Sort</button></div>
+
           </div>
         </div>
 

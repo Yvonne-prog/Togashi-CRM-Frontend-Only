@@ -8,6 +8,7 @@ import { Shell } from '@/components/layout/Shell';
 import type { Permission } from '@/lib/permissions';
 
 import Login from '@/pages/login';
+import Register from '@/pages/register';
 import Dashboard from '@/pages/dashboard';
 import Contacts from '@/pages/contacts';
 import ContactDetail from '@/pages/contacts/[id]';
@@ -48,12 +49,17 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       
       <Route path="*">
         <AuthProvider>
           <Shell>
             <Switch>
-              <Route path="/" component={Dashboard} />
+              <Route path="/">
+                <ProtectedRoute permission="dashboard.view">
+                  <Dashboard />
+                </ProtectedRoute>
+              </Route>
               
               <Route path="/contacts">
                 <ProtectedRoute permission="contacts.view">

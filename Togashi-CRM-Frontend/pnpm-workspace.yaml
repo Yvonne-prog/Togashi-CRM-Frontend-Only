@@ -38,6 +38,7 @@ packages:
   - artifacts/togashi-crm
   - lib/api-client-react
   - lib/api-spec
+  - backend
 
 catalog:
   '@replit/vite-plugin-cartographer': ^0.5.21
@@ -159,4 +160,7 @@ overrides:
   esbuild: "0.27.3"
 
 allowBuilds:
+  '@scarf/scarf': false
   esbuild: true
+  protobufjs: true
+  unrs-resolver: true

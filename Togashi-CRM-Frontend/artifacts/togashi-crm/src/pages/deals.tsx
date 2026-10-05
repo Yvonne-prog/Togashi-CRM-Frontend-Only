@@ -5,7 +5,7 @@ import type { Deal } from '@/data/dashboardMockData';
 import {
   Add, SearchNormal1, More, Calendar, ArrowRight,
   WalletMoney, StatusUp, ChartSquare, TickCircle, ArrowLeft,
-  Call, Sms, Timer, Sort, ArrowDown2,
+  Call, Sms, Timer, ArrowDown2,
   Eye, Edit, Copy, Trash, NoteAdd, CloseCircle,
 } from 'iconsax-react';
 
@@ -151,9 +151,6 @@ export default function Deals() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-            <Sort size={14} variant="Linear" color="currentColor" />Sort
-          </button>
           <div className="relative">
             <button onClick={() => setMoreOpen(!moreOpen)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
               <More size={14} variant="Linear" color="currentColor" />More

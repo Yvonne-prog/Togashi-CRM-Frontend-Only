@@ -3,7 +3,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { quotations as mockQuotations, quotationStats } from '@/data/dashboardMockData';
 import type { Quotation, QuotationStatus, QuotationLineItem } from '@/data/dashboardMockData';
 import {
-  Add, SearchNormal1, Sort, More, ArrowLeft, ArrowDown2, DocumentText,
+  Add, SearchNormal1, More, ArrowLeft, ArrowDown2, DocumentText,
   NoteAdd, Eye, Edit, Copy, Trash, TickCircle, CloseCircle, Send,
   Printer, Timer, Calendar,
 } from 'iconsax-react';
@@ -443,9 +443,6 @@ export default function Quotations() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-            <Sort size={14} variant="Linear" color="currentColor" />Sort
-          </button>
         </div>
       </div>
 

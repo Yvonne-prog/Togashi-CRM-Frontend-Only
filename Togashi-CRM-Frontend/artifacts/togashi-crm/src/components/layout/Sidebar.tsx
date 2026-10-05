@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'wouter';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useLogout } from '@workspace/api-client-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import type { Permission } from '@/lib/permissions';
@@ -43,8 +42,7 @@ interface SidebarProps {
 
 export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const [location] = useLocation();
-  const { user } = useAuth();
-  const logout = useLogout();
+  const { user, logout } = useAuth();
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,9 +51,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
 
   const handleLogout = () => {
     setMenuOpen(false);
-    logout.mutate(undefined, {
-      onSuccess: () => { window.location.href = '/login'; }
-    });
+    logout();
   };
 
   const handleNavClick = () => {
@@ -115,16 +111,33 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         </button>
       )}
 
-      <div className="h-16 flex items-center justify-center px-4 border-b border-[#1E293B] shrink-0">
+      <Link
+        href="/"
+        aria-label="Go to Dashboard"
+        className="block py-5 px-6 border-b border-[#1E293B] shrink-0 hover:bg-white/[0.03] transition-colors cursor-pointer"
+      >
         {!isMobile && collapsed ? (
-          <div className="flex justify-center font-bold text-[#16A34A] text-xl">T</div>
+          <div className="flex justify-center">
+            <img
+              src="/images/togashi-logo.JPEG"
+              alt="Togashi"
+              className="h-8 w-auto max-w-full object-contain rounded-[4px]"
+            />
+          </div>
         ) : (
-          <div className="flex items-center font-bold text-xl tracking-tight">
-            <span>TOGASHI</span>
-            <span className="text-[#16A34A] ml-1">CRM</span>
+          <div className="flex flex-col items-start gap-2">
+            <img
+              src="/images/togashi-logo.JPEG"
+              alt="Togashi"
+              className="h-[38px] w-auto object-contain rounded-[4px]"
+            />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[17px] font-semibold text-white tracking-tight leading-tight">Togashi CRM</span>
+              <span className="text-[12px] font-normal text-slate-400 leading-tight">Business Platform</span>
+            </div>
           </div>
         )}
-      </div>
+      </Link>
 
       {!isMobile && (
         <button
@@ -213,7 +226,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
             {(!isMobile && collapsed) ? null : (
               <div className="flex flex-col items-start truncate">
                 <span className="text-sm font-medium text-white truncate">{user?.name || 'User'}</span>
-                <span className="text-xs text-slate-400 truncate">{user?.roleLabel || user?.role || 'User'}</span>
+                <span className="text-xs text-slate-400 truncate">{user?.jobTitle || 'User'}</span>
               </div>
             )}
           </div>
@@ -269,7 +282,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                   className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <SecurityUser size={17} variant="Linear" color="#64748B" />
-                  <span>Users & Roles</span>
+                  <span>User Access</span>
                 </Link>
               )}
             </div>

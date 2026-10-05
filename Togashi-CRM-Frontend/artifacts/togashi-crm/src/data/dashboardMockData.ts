@@ -175,6 +175,37 @@ export const teamMembers: TeamMember[] = [
   { userId: 'usr-4', name: 'Grace Nakato', initials: 'GN', dealsWon: 2, revenue: 12500000, tasksCompleted: 22 },
 ];
 
+export interface TeamWorkload {
+  userId: string;
+  name: string;
+  initials: string;
+  role: string;
+  project: string;
+  progress: number;
+  status: 'On Track' | 'In Progress' | 'Waiting for Client' | 'Review' | 'Blocked' | 'Completed';
+  secondary?: string;
+}
+
+export const teamWorkloads: TeamWorkload[] = [
+  { userId: 'usr-4', name: 'Grace Nakato', initials: 'GN', role: 'Finance Officer', project: 'Invoice reconciliation for July', progress: 75, status: 'On Track', secondary: 'Due: Friday' },
+  { userId: 'usr-3', name: 'David Okello', initials: 'DO', role: 'Software Developer', project: 'CRM Role-Based Access UI', progress: 45, status: 'In Progress', secondary: 'Updated: 2 hours ago' },
+  { userId: 'usr-2', name: 'Sarah Birungi', initials: 'SB', role: 'Business Development', project: 'Katrina Fashion Website Proposal', progress: 90, status: 'Waiting for Client', secondary: 'Due: Tuesday' },
+  { userId: 'usr-1', name: 'Alex Mugisha', initials: 'AM', role: 'Project Manager', project: 'Amira Interiors Phase II', progress: 60, status: 'Review', secondary: 'Updated: Yesterday' },
+];
+
+export interface RevenueByServiceItem {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export const revenueByService: RevenueByServiceItem[] = [
+  { name: 'Custom Software', value: 92000000, color: '#3B82F6' },
+  { name: 'Website Development', value: 68000000, color: '#16A34A' },
+  { name: 'Mobile Applications', value: 38000000, color: '#8B5CF6' },
+  { name: 'Systems Integration', value: 27000000, color: '#F59E0B' },
+];
+
 export const revenueData: RevenueDataPoint[] = [
   { month: 'Jan', value: 18000000 },
   { month: 'Feb', value: 21000000 },
